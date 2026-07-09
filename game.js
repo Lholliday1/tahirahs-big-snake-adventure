@@ -1,3 +1,6 @@
+const gameBackground = new Image();
+gameBackground.src = "assets/images/game-background.jpeg";
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -360,8 +363,15 @@ function draw() {
         return;
     }
 
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (gameBackground.complete) {
+        ctx.drawImage(gameBackground, 0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "rgba(0, 0, 0, 0.20)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
     moveSnake();
     checkWallCollision();
