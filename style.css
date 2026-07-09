@@ -50,8 +50,8 @@ canvas {
 
     display: block;
 
-    width: min(92vw, 600px);
-    height: min(92vw, 600px);
+    width: min(94vw, 700px);
+    height: min(94vw, 700px);
 
     touch-action: none;
 }
@@ -75,7 +75,7 @@ canvas {
 }
 
 #bottomBar {
-    width: min(92vw, 600px);
+    width: min(94vw, 700px);
 
     display: flex;
     flex-direction: column;
@@ -107,4 +107,22 @@ canvas {
     min-height: 20px;
     opacity: 0.85;
     transition: opacity 0.4s ease;
+}
+
+#pauseButton {
+    margin-top: 0;
+    padding: 10px 18px;
+
+    background: rgba(0, 0, 0, 0.55);
+    color: white;
+
+    border: 2px solid deepskyblue;
+    border-radius: 999px;
+
+    font-size: 16px;
+    cursor: pointer;
+
+    box-shadow:
+        0 0 10px deepskyblue,
+        0 0 20px dodgerblue;
 }

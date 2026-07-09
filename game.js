@@ -18,6 +18,7 @@ heartPop.volume = 0.01;
 const bgMusic = document.getElementById("bgMusic");
 bgMusic.volume = 0.35;
 const muteButton = document.getElementById("muteButton");
+const pauseButton = document.getElementById("pauseButton");
 const notificationBar = document.getElementById("notificationBar");
 const tipBar = document.getElementById("tipBar");
 let muted = false;
@@ -36,6 +37,24 @@ muteButton.addEventListener("click", function() {
         : "🔊 Sound On";
 });
 
+pauseButton.addEventListener("click", function() {
+
+    if (!gameStarted || gameOver || gameWon) {
+        return;
+    }
+
+    gamePaused = !gamePaused;
+
+    if (gamePaused) {
+        pauseButton.textContent = "▶️ Resume";
+        showNotification("⏸️ Game Paused", 2000);
+    } else {
+        pauseButton.textContent = "⏸️ Pause";
+        showNotification("▶️ Game Resumed", 2000);
+    }
+
+});
+
 const introBackground = new Image();
 introBackground.src = "assets/images/intro-background.jpeg";
 const gameOverBackground = new Image();
@@ -52,26 +71,26 @@ function startMusic() {
 }
 
 const snake = {
-    body: [{ x: 100, y: 100 }],
-    size: 20,
+    body: [{ x: 96, y: 96 }],
+    size: 24,
     color: "lime",
-    speed: 20,
+    speed: 24,
     directionX: 1,
     directionY: 0,
     growing: false
 };
 
 const food = {
-    x: 300,
-    y: 300,
-    size: 20,
+    x: 288,
+    y: 288,
+    size: 24,
     emoji: "❤️"
 };
 
 const cuzon = {
-    x: 420,
-    y: 220,
-    size: 20,
+    x: 432,
+    y: 216,
+    size: 24,
     emoji: "🤢"
 };
 
@@ -81,6 +100,7 @@ let gameStarted = false;
 let gameOver = false;
 let gameOverReason = "";
 let gameWon = false;
+let gamePaused = false;
 const winningScore = 25;
 const topHudHeight = 80;
 const bottomHudHeight = 0;
@@ -99,9 +119,9 @@ let notificationTimer = 0;
 let crownRespawnCounter = 0;
 const crownRespawnDelay = 80;
 const crown = {
-    x: 200,
-    y: 200,
-    size: 20,
+    x: 192,
+    y: 192,
+    size: 24,
     emoji: "👑",
     visible: false,
     active: false,
@@ -280,7 +300,22 @@ if (Math.abs(distanceX) > Math.abs(distanceY)) {
 }
 }
 
-document.addEventListener("keydown", function(event) {
+document.addEventListener("keydown", function(event) {if (event.key.toLowerCase() === "p" && gameStarted && !gameOver && !gameWon) {
+    gamePaused = !gamePaused;
+
+if (gamePaused) {
+    pauseButton.textContent = "▶️ Resume";
+    showNotification("⏸️ Game Paused", 2000);
+} else {
+    pauseButton.textContent = "⏸️ Pause";
+    showNotification("▶️ Game Resumed", 2000);
+}
+
+return;
+
+    showNotification(gamePaused ? "⏸️ Game Paused" : "▶️ Game Resumed", 2000);
+    return;
+}
     if ((gameOver || gameWon) && event.key.toLowerCase() === "r") {
     location.reload();
 }
@@ -376,16 +411,40 @@ function drawSnake() {
         ctx.fillRect(part.x, part.y, snake.size, snake.size);
         ctx.strokeRect(part.x, part.y, snake.size, snake.size);
     });
+    if (crown.active) {
+    const head = snake.body[0];
+
+    ctx.save();
+
+    // Blink when the timer gets low
+    if (crown.timer <= 15) {
+        ctx.globalAlpha = (Math.sin(Date.now() / 60) + 1) / 2;
+    }
+
+    // Gentle fade before the final blink
+    else if (crown.timer <= 25) {
+        ctx.globalAlpha = 0.5 + Math.sin(Date.now() / 180) * 0.5;
+    }
+
+    // Golden glow while crown is active
+ctx.shadowColor = "gold";
+ctx.shadowBlur = 18;
+    ctx.font = "20px Arial";
+    ctx.fillText("👑", head.x - 2, head.y - 4);
+
+    ctx.restore();
+}
 }
 
+
 function drawFood() {
-    ctx.font = "24px Arial";
-    ctx.fillText(food.emoji, food.x, food.y + 20);
+    ctx.font = "30px Arial";
+    ctx.fillText(food.emoji, food.x, food.y + 22);
 }
 
 function drawCuzon() {
-    ctx.font = "24px Arial";
-    ctx.fillText(cuzon.emoji, cuzon.x, cuzon.y + 20);
+    ctx.font = "30px Arial";
+    ctx.fillText(cuzon.emoji, cuzon.x, cuzon.y + 22);
 }
 
 function drawCrown() {
@@ -396,9 +455,9 @@ function drawCrown() {
     ctx.save();
 
     ctx.shadowColor = "gold";
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur = 12 + Math.sin(Date.now() / 150) * 8;
 
-    ctx.font = "28px Arial";
+    ctx.font = "34px Arial";
     ctx.fillText(crown.emoji, crown.x, crown.y + 20 + bounce);
 
     ctx.restore();
@@ -536,7 +595,13 @@ function moveCrown() {
 function checkCrownCollision() {
     const head = snake.body[0];
 
-    if (crown.visible && head.x === crown.x && head.y === crown.y) {
+    if (
+    crown.visible &&
+    head.x < crown.x + crown.size &&
+    head.x + snake.size > crown.x &&
+    head.y < crown.y + crown.size &&
+    head.y + snake.size > crown.y
+) {
         crown.visible = false;
         crown.active = true;
         crown.timer = 50;
@@ -550,17 +615,22 @@ function checkCrownCollision() {
     }
 
     if (crown.active) {
-        crown.timer--;
 
-        if (crown.timer <= 0) {
+    crown.timer--;
+
+    if (crown.timer === 15) {
+        showNotification("⚠️ Crown power ending!", 1500);
+    }
+
+    if (crown.timer <= 0) {
             crown.active = false;
             crownRespawnCounter = 0;
 
             cuzon.emoji = "🤢";
 
             showNotification("⚠️ Cuzon is moving again!", 3000);
-        }
     }
+}
 
     if (!crown.visible && !crown.active && cuzonChaseMode && !gameOver && !gameWon) {
         crownRespawnCounter++;
@@ -578,7 +648,12 @@ function checkCrownCollision() {
 function checkFoodCollision() {
     const head = snake.body[0];
 
-    if (head.x === food.x && head.y === food.y) {
+    if (
+    head.x < food.x + food.size &&
+    head.x + snake.size > food.x &&
+    head.y < food.y + food.size &&
+    head.y + snake.size > food.y
+) {
         score++;
         snake.growing = true;
         heartPop.currentTime = 0;
@@ -639,7 +714,12 @@ function checkWallCollision() {
 function checkCuzonCollision() {
     const head = snake.body[0];
 
-    if (head.x === cuzon.x && head.y === cuzon.y) {
+    if (
+    head.x < cuzon.x + cuzon.size &&
+    head.x + snake.size > cuzon.x &&
+    head.y < cuzon.y + cuzon.size &&
+    head.y + snake.size > cuzon.y
+) {
         gameOver = true;
         gameOverReason = "Cuzon got too close and got SICK! 🤢";
         stopMusic();
@@ -788,6 +868,20 @@ function draw() {
         drawGameOver();
         return;
     }
+    if (gamePaused) {
+    drawScore();
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "white";
+    ctx.font = "bold 42px Arial";
+    ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
+
+    ctx.font = "22px Arial";
+    ctx.fillText("Press P to Resume", canvas.width / 2, canvas.height / 2 + 45);
+
+    ctx.textAlign = "start";
+    return;
+}
 
     if (gameBackground.complete) {
         ctx.drawImage(gameBackground, 0, 0, canvas.width, canvas.height);
