@@ -49,7 +49,25 @@ canvas {
     display: block;
 
     width: min(92vw, 600px);
-    height: min(92vw, calc(100vh - 90px), 600px);
+    height: min(92vw, 600px);
 
     touch-action: none;
+}
+
+/* Phone-only layout */
+@media (max-width: 700px) {
+    #gameContainer {
+        padding: 6px;
+    }
+
+    h1 {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+
+    canvas {
+        width: 96vw;
+        height: 96vw;
+        max-height: calc(100vh - 150px);
+    }
 }
