@@ -56,12 +56,22 @@ let gameOver = false;
 let gameOverReason = "";
 let gameWon = false;
 const winningScore = 25;
+const topHudHeight = 80;
+const bottomHudHeight = 0;
 
 let touchStartX = 0;
 let touchStartY = 0;
 
-function randomGridPosition(size) {
-    return Math.floor(Math.random() * (canvas.width / size)) * size;
+function randomGridPosition(size, axis) {
+    if (axis === "x") {
+        return Math.floor(Math.random() * (canvas.width / size)) * size;
+    }
+
+    const minY = topHudHeight;
+    const maxY = canvas.height - bottomHudHeight - size;
+
+    const rows = Math.floor((maxY - minY) / size);
+    return minY + Math.floor(Math.random() * rows) * size;
 }
 
 function isOnSnake(x, y) {
@@ -119,8 +129,8 @@ function moveFood() {
     let newY;
 
     do {
-        newX = randomGridPosition(food.size);
-        newY = randomGridPosition(food.size);
+        newX = randomGridPosition(food.size, "x");
+        newY = randomGridPosition(food.size, "y");
     } while (isOnSnake(newX, newY) || (newX === cuzon.x && newY === cuzon.y));
 
     food.x = newX;
@@ -136,8 +146,8 @@ function moveCuzon() {
     let newY;
 
     do {
-        newX = randomGridPosition(cuzon.size);
-        newY = randomGridPosition(cuzon.size);
+        newX = randomGridPosition(cuzon.size, "x");
+        newY = randomGridPosition(cuzon.size, "y");
     } while (isOnSnake(newX, newY) || (newX === food.x && newY === food.y));
 
     cuzon.x = newX;
@@ -253,18 +263,20 @@ function drawCuzon() {
 }
 
 function drawScore() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+    ctx.fillRect(0, 0, canvas.width, topHudHeight);
+
+    ctx.strokeStyle = "hotpink";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, topHudHeight);
+    ctx.lineTo(canvas.width, topHudHeight);
+    ctx.stroke();
+
     ctx.fillStyle = "white";
     ctx.font = "22px Arial";
     ctx.fillText("Hearts: " + score, 20, 35);
     ctx.fillText("Best: " + highScore, 20, 65);
-}
-
-function drawLoveMessage() {
-    if (score >= 10) {
-        ctx.fillStyle = "pink";
-        ctx.font = "28px Arial";
-        ctx.fillText("Tahirah is too powerful now! ❤️", 85, 570);
-    }
 }
 
 function drawStartScreen() {
@@ -318,10 +330,9 @@ function checkFoodCollision() {
         if (score >= winningScore) {
             gameWon = true;
             stopMusic();
-            if (score > highScore) {
-    highScore = score;
-    localStorage.setItem("tahirahHighScore", highScore);
-}
+            updateHighScore();
+            return;
+            
             return;
         }
 
@@ -334,21 +345,17 @@ function checkWallCollision() {
 
     if (
         head.x < 0 ||
-        head.y < 0 ||
+        head.y < topHudHeight ||
         head.x >= canvas.width ||
         head.y >= canvas.height
     ) {
         gameOver = true;
         gameOverReason = "Tahirah ran out of room! 😭";
         stopMusic();
-updateHighScore();
-        if (score > highScore) {
-    highScore = score;
-    localStorage.setItem("tahirahHighScore", highScore);
-}
+        updateHighScore();
 
-eddieLaugh.currentTime = 0;
-eddieLaugh.play();
+        eddieLaugh.currentTime = 0;
+        eddieLaugh.play();
     }
 }
 
