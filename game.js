@@ -494,8 +494,11 @@ function drawWinScreen() {
     ctx.textAlign = "center";
 
     ctx.fillStyle = "#ff4fd8";
-    ctx.font = "bold 48px Arial";
-    ctx.fillText("YOU WIN! ❤️", canvas.width / 2, 180);
+ctx.font = "bold 48px Arial";
+ctx.fillText("YOU WIN!", canvas.width / 2, 180);
+
+ctx.font = "40px Arial";
+ctx.fillText("❤️", canvas.width / 2, 225);
 
     ctx.fillStyle = "white";
     ctx.font = "26px Arial";
