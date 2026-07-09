@@ -4,6 +4,9 @@ const ctx = canvas.getContext("2d");
 const bgMusic = document.getElementById("bgMusic");
 bgMusic.volume = 0.35;
 
+const introBackground = new Image();
+introBackground.src = "assets/images/intro-background.jpeg";
+
 function startMusic() {
     bgMusic.volume = 0.35;
 
@@ -41,6 +44,9 @@ let gameStarted = false;
 let gameOver = false;
 let gameOverReason = "";
 
+let touchStartX = 0;
+let touchStartY = 0;
+
 function randomGridPosition(size) {
     return Math.floor(Math.random() * (canvas.width / size)) * size;
 }
@@ -49,6 +55,35 @@ function isOnSnake(x, y) {
     return snake.body.some(function(part) {
         return part.x === x && part.y === y;
     });
+}
+
+function startGame() {
+    if (!gameStarted && !gameOver) {
+        gameStarted = true;
+        startMusic();
+    }
+}
+
+function changeDirection(newDirectionX, newDirectionY) {
+    if (newDirectionX === 0 && newDirectionY === -1 && snake.directionY !== 1) {
+        snake.directionX = 0;
+        snake.directionY = -1;
+    }
+
+    if (newDirectionX === 0 && newDirectionY === 1 && snake.directionY !== -1) {
+        snake.directionX = 0;
+        snake.directionY = 1;
+    }
+
+    if (newDirectionX === -1 && newDirectionY === 0 && snake.directionX !== 1) {
+        snake.directionX = -1;
+        snake.directionY = 0;
+    }
+
+    if (newDirectionX === 1 && newDirectionY === 0 && snake.directionX !== -1) {
+        snake.directionX = 1;
+        snake.directionY = 0;
+    }
 }
 
 function moveSnake() {
@@ -102,38 +137,71 @@ document.addEventListener("keydown", function(event) {
     }
 
     if (!gameStarted) {
-        gameStarted = true;
-        startMusic();
+        startGame();
         return;
     }
 
-    if (event.key === "ArrowUp" && snake.directionY !== 1) {
-        snake.directionX = 0;
-        snake.directionY = -1;
+    if (event.key === "ArrowUp") {
+        changeDirection(0, -1);
     }
 
-    if (event.key === "ArrowDown" && snake.directionY !== -1) {
-        snake.directionX = 0;
-        snake.directionY = 1;
+    if (event.key === "ArrowDown") {
+        changeDirection(0, 1);
     }
 
-    if (event.key === "ArrowLeft" && snake.directionX !== 1) {
-        snake.directionX = -1;
-        snake.directionY = 0;
+    if (event.key === "ArrowLeft") {
+        changeDirection(-1, 0);
     }
 
-    if (event.key === "ArrowRight" && snake.directionX !== -1) {
-        snake.directionX = 1;
-        snake.directionY = 0;
+    if (event.key === "ArrowRight") {
+        changeDirection(1, 0);
     }
 });
 
 canvas.addEventListener("click", function() {
-    if (!gameStarted && !gameOver) {
-        gameStarted = true;
-        startMusic();
-    }
+    startGame();
 });
+
+canvas.addEventListener("touchstart", function(event) {
+    event.preventDefault();
+
+    startGame();
+
+    touchStartX = event.touches[0].clientX;
+    touchStartY = event.touches[0].clientY;
+}, { passive: false });
+
+canvas.addEventListener("touchmove", function(event) {
+    event.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener("touchend", function(event) {
+    event.preventDefault();
+
+    const touchEndX = event.changedTouches[0].clientX;
+    const touchEndY = event.changedTouches[0].clientY;
+
+    const diffX = touchEndX - touchStartX;
+    const diffY = touchEndY - touchStartY;
+
+    if (Math.abs(diffX) < 20 && Math.abs(diffY) < 20) {
+        return;
+    }
+
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 0) {
+            changeDirection(1, 0);
+        } else {
+            changeDirection(-1, 0);
+        }
+    } else {
+        if (diffY > 0) {
+            changeDirection(0, 1);
+        } else {
+            changeDirection(0, -1);
+        }
+    }
+}, { passive: false });
 
 function stopMusic() {
     bgMusic.pause();
@@ -176,7 +244,14 @@ function drawLoveMessage() {
 }
 
 function drawStartScreen() {
-    ctx.fillStyle = "black";
+    if (introBackground.complete) {
+        ctx.drawImage(introBackground, 0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.textAlign = "center";
@@ -193,7 +268,7 @@ function drawStartScreen() {
     ctx.fillText("Developed by LaQuinton Holliday", canvas.width / 2, 340);
 
     ctx.font = "24px Arial";
-    ctx.fillText("Press Any Key or Click to Begin", canvas.width / 2, 430);
+    ctx.fillText("Press Any Key, Click, or Swipe to Begin", canvas.width / 2, 430);
 
     ctx.textAlign = "start";
 }
