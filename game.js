@@ -521,4 +521,4 @@ function draw() {
 }
 
 setInterval(draw, 150);
-setInterval(moveCuzon, 2500);
+setInterval(moveCuzon, 150);
