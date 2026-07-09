@@ -1,5 +1,3 @@
-
-
 const gameBackground = new Image();
 gameBackground.src = "assets/images/game-background.jpeg";
 
@@ -8,19 +6,24 @@ const ctx = canvas.getContext("2d");
 
 const eddieLaugh = new Audio("assets/sounds/eddie-haha.mp3");
 eddieLaugh.volume = 1.0;
+
 const princeDidThat = new Audio("assets/sounds/prince-did-that.mp3");
 princeDidThat.volume = 0.25;
+
 const winSound = new Audio("assets/sounds/aww-so-cute.m4a");
 winSound.volume = 0.45;
+
 const heartPop = new Audio("assets/sounds/heart-pop.mp3");
 heartPop.volume = 0.01;
 
 const bgMusic = document.getElementById("bgMusic");
 bgMusic.volume = 0.35;
+
 const muteButton = document.getElementById("muteButton");
 const pauseButton = document.getElementById("pauseButton");
 const notificationBar = document.getElementById("notificationBar");
 const tipBar = document.getElementById("tipBar");
+
 let muted = false;
 
 muteButton.addEventListener("click", function() {
@@ -38,7 +41,6 @@ muteButton.addEventListener("click", function() {
 });
 
 pauseButton.addEventListener("click", function() {
-
     if (!gameStarted || gameOver || gameWon) {
         return;
     }
@@ -52,13 +54,14 @@ pauseButton.addEventListener("click", function() {
         pauseButton.textContent = "⏸️ Pause";
         showNotification("▶️ Game Resumed", 2000);
     }
-
 });
 
 const introBackground = new Image();
 introBackground.src = "assets/images/intro-background.jpeg";
+
 const gameOverBackground = new Image();
 gameOverBackground.src = "assets/images/game-over.jpeg";
+
 const winBackground = new Image();
 winBackground.src = "assets/images/win-screen.jpeg";
 
@@ -96,28 +99,34 @@ const cuzon = {
 
 let score = 0;
 let highScore = localStorage.getItem("tahirahHighScore") || 0;
+
 let gameStarted = false;
 let gameOver = false;
 let gameOverReason = "";
 let gameWon = false;
 let gamePaused = false;
+
 const winningScore = 25;
 const topHudHeight = 80;
 const bottomHudHeight = 0;
+
 let cuzonChaseMode = false;
 let cuzonMoveCounter = 0;
 let cuzonChaseDelay = 4;
 
 let touchStartX = 0;
 let touchStartY = 0;
+
 let heartEffects = [];
 let winHearts = [];
 let brokenHearts = [];
 
 let notificationText = "";
 let notificationTimer = 0;
+
 let crownRespawnCounter = 0;
 const crownRespawnDelay = 80;
+
 const crown = {
     x: 192,
     y: 192,
@@ -127,6 +136,7 @@ const crown = {
     active: false,
     timer: 0
 };
+
 const tips = [
     "💡 Swipe or use Arrow Keys to move",
     "❤️ Collect 25 Hearts to Win",
@@ -138,7 +148,6 @@ const tips = [
 
 let currentTip = 0;
 let tipInterval = null;
-
 
 function startTips() {
     if (tipInterval !== null) {
@@ -160,6 +169,7 @@ function randomGridPosition(size, axis) {
     const maxY = canvas.height - bottomHudHeight - size;
 
     const rows = Math.floor((maxY - minY) / size);
+
     return minY + Math.floor(Math.random() * rows) * size;
 }
 
@@ -176,7 +186,6 @@ function startGame() {
         startMusic();
         startTips();
 
-        // Show the very first tip immediately
         tipBar.textContent = tips[0];
     }
 }
@@ -225,7 +234,10 @@ function moveFood() {
     do {
         newX = randomGridPosition(food.size, "x");
         newY = randomGridPosition(food.size, "y");
-    } while (isOnSnake(newX, newY) || (newX === cuzon.x && newY === cuzon.y));
+    } while (
+        isOnSnake(newX, newY) ||
+        (newX === cuzon.x && newY === cuzon.y)
+    );
 
     food.x = newX;
     food.y = newY;
@@ -235,11 +247,11 @@ function moveCuzon() {
     if (!gameStarted || gameOver || gameWon) {
         return;
     }
-    if (crown.active) {
-    return;
-}
 
-    // BEFORE 10 hearts: slow teleport behavior
+    if (crown.active) {
+        return;
+    }
+
     if (!cuzonChaseMode) {
         cuzonMoveCounter++;
 
@@ -265,63 +277,64 @@ function moveCuzon() {
         return;
     }
 
-    // AFTER 10 hearts: natural chase
-cuzonMoveCounter++;
+    cuzonMoveCounter++;
 
-if (cuzonMoveCounter < 2) {
-    return;
-}
-
-cuzonMoveCounter = 0;
-
-const head = snake.body[0];
-
-const distanceX = head.x - cuzon.x;
-const distanceY = head.y - cuzon.y;
-
-// Sometimes Cuzon hesitates so it feels less robotic
-if (Math.random() < 0.15) {
-    return;
-}
-
-// Move on the axis with the bigger distance
-if (Math.abs(distanceX) > Math.abs(distanceY)) {
-    if (distanceX > 0) {
-        cuzon.x += cuzon.size;
-    } else if (distanceX < 0) {
-        cuzon.x -= cuzon.size;
+    if (cuzonMoveCounter < 2) {
+        return;
     }
-} else {
-    if (distanceY > 0) {
-        cuzon.y += cuzon.size;
-    } else if (distanceY < 0) {
-        cuzon.y -= cuzon.size;
+
+    cuzonMoveCounter = 0;
+
+    const head = snake.body[0];
+
+    const distanceX = head.x - cuzon.x;
+    const distanceY = head.y - cuzon.y;
+
+    if (Math.random() < 0.15) {
+        return;
+    }
+
+    if (Math.abs(distanceX) > Math.abs(distanceY)) {
+        if (distanceX > 0) {
+            cuzon.x += cuzon.size;
+        } else if (distanceX < 0) {
+            cuzon.x -= cuzon.size;
+        }
+    } else {
+        if (distanceY > 0) {
+            cuzon.y += cuzon.size;
+        } else if (distanceY < 0) {
+            cuzon.y -= cuzon.size;
+        }
     }
 }
-}
 
-document.addEventListener("keydown", function(event) {if (event.key.toLowerCase() === "p" && gameStarted && !gameOver && !gameWon) {
-    gamePaused = !gamePaused;
+document.addEventListener("keydown", function(event) {
+    if (event.key.toLowerCase() === "p" && gameStarted && !gameOver && !gameWon) {
+        gamePaused = !gamePaused;
 
-if (gamePaused) {
-    pauseButton.textContent = "▶️ Resume";
-    showNotification("⏸️ Game Paused", 2000);
-} else {
-    pauseButton.textContent = "⏸️ Pause";
-    showNotification("▶️ Game Resumed", 2000);
-}
+        if (gamePaused) {
+            pauseButton.textContent = "▶️ Resume";
+            showNotification("⏸️ Game Paused", 2000);
+        } else {
+            pauseButton.textContent = "⏸️ Pause";
+            showNotification("▶️ Game Resumed", 2000);
+        }
 
-return;
+        return;
+    }
 
-    showNotification(gamePaused ? "⏸️ Game Paused" : "▶️ Game Resumed", 2000);
-    return;
-}
     if ((gameOver || gameWon) && event.key.toLowerCase() === "r") {
-    location.reload();
-}
+        location.reload();
+        return;
+    }
 
     if (!gameStarted) {
         startGame();
+        return;
+    }
+
+    if (gamePaused) {
         return;
     }
 
@@ -344,9 +357,9 @@ return;
 
 canvas.addEventListener("click", function() {
     if (gameOver || gameWon) {
-    location.reload();
-    return;
-}
+        location.reload();
+        return;
+    }
 
     startGame();
 });
@@ -368,9 +381,13 @@ canvas.addEventListener("touchend", function(event) {
     event.preventDefault();
 
     if (gameOver || gameWon) {
-    location.reload();
-    return;
-}
+        location.reload();
+        return;
+    }
+
+    if (gamePaused) {
+        return;
+    }
 
     const touchEndX = event.changedTouches[0].clientX;
     const touchEndY = event.changedTouches[0].clientY;
@@ -411,31 +428,26 @@ function drawSnake() {
         ctx.fillRect(part.x, part.y, snake.size, snake.size);
         ctx.strokeRect(part.x, part.y, snake.size, snake.size);
     });
+
     if (crown.active) {
-    const head = snake.body[0];
+        const head = snake.body[0];
 
-    ctx.save();
+        ctx.save();
 
-    // Blink when the timer gets low
-    if (crown.timer <= 15) {
-        ctx.globalAlpha = (Math.sin(Date.now() / 60) + 1) / 2;
+        if (crown.timer <= 15) {
+            ctx.globalAlpha = (Math.sin(Date.now() / 60) + 1) / 2;
+        } else if (crown.timer <= 25) {
+            ctx.globalAlpha = 0.5 + Math.sin(Date.now() / 180) * 0.5;
+        }
+
+        ctx.shadowColor = "gold";
+        ctx.shadowBlur = 18;
+        ctx.font = "20px Arial";
+        ctx.fillText("👑", head.x - 2, head.y - 4);
+
+        ctx.restore();
     }
-
-    // Gentle fade before the final blink
-    else if (crown.timer <= 25) {
-        ctx.globalAlpha = 0.5 + Math.sin(Date.now() / 180) * 0.5;
-    }
-
-    // Golden glow while crown is active
-ctx.shadowColor = "gold";
-ctx.shadowBlur = 18;
-    ctx.font = "20px Arial";
-    ctx.fillText("👑", head.x - 2, head.y - 4);
-
-    ctx.restore();
 }
-}
-
 
 function drawFood() {
     ctx.font = "30px Arial";
@@ -448,7 +460,9 @@ function drawCuzon() {
 }
 
 function drawCrown() {
-    if (!crown.visible) return;
+    if (!crown.visible) {
+        return;
+    }
 
     const bounce = Math.sin(Date.now() / 150) * 5;
 
@@ -464,7 +478,8 @@ function drawCrown() {
 }
 
 function drawScore() {
-    ctx.textAlign = "center";
+    ctx.save();
+
     ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
     ctx.fillRect(0, 0, canvas.width, topHudHeight);
 
@@ -476,9 +491,17 @@ function drawScore() {
     ctx.stroke();
 
     ctx.fillStyle = "white";
-    ctx.font = "22px Arial";
-    ctx.fillText("Hearts: " + score, 20, 35);
-    ctx.fillText("Best: " + highScore, 20, 65);
+    ctx.font = "bold 22px Arial";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 6;
+
+    ctx.fillText("Hearts: " + score, 24, 14);
+    ctx.fillText("Best: " + highScore, 24, 44);
+
+    ctx.restore();
 }
 
 function showNotification(text, time) {
@@ -515,18 +538,18 @@ function drawStartScreen() {
     ctx.fillText("Collect the hearts before", canvas.width / 2, 285 * scale);
     ctx.fillText("Cuzon gets sick 🤢", canvas.width / 2, 315 * scale);
 
-    // Developer credit - bottom right
-ctx.textAlign = "right";
+    ctx.textAlign = "right";
 
-ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-ctx.font = `${13 * scale}px Arial`;
-ctx.fillText("Developed by LaQuinton Holliday", canvas.width - 14, canvas.height - 34);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.font = `${13 * scale}px Arial`;
+    ctx.fillText("Developed by LaQuinton Holliday", canvas.width - 14, canvas.height - 34);
 
-ctx.fillStyle = "rgba(255, 192, 203, 0.95)";
-ctx.font = `${12 * scale}px Arial`;
-ctx.fillText("Music by LaQuinton Holliday", canvas.width - 14, canvas.height - 16);
+    ctx.fillStyle = "rgba(255, 192, 203, 0.95)";
+    ctx.font = `${12 * scale}px Arial`;
+    ctx.fillText("Music by LaQuinton Holliday", canvas.width - 14, canvas.height - 16);
 
-ctx.textAlign = "center";
+    ctx.textAlign = "center";
+
     ctx.font = `${24 * scale}px Arial`;
     ctx.fillText("Press Any Key, Click,", canvas.width / 2, 465 * scale);
     ctx.fillText("or Swipe to Begin", canvas.width / 2, 495 * scale);
@@ -552,28 +575,21 @@ function createHeartEffect(x, y) {
 }
 
 function createWinHeart() {
-
     winHearts.push({
         x: Math.random() * canvas.width,
         y: -30,
-
         speed: 2 + Math.random() * 2,
-
         size: 18 + Math.random() * 12
     });
-
 }
-function createBrokenHeart() {
 
+function createBrokenHeart() {
     brokenHearts.push({
         x: Math.random() * canvas.width,
         y: -30,
-
         speed: 2 + Math.random() * 2,
-
         size: 18 + Math.random() * 12
     });
-
 }
 
 function moveCrown() {
@@ -597,12 +613,12 @@ function checkCrownCollision() {
     const head = snake.body[0];
 
     if (
-    crown.visible &&
-    head.x < crown.x + crown.size &&
-    head.x + snake.size > crown.x &&
-    head.y < crown.y + crown.size &&
-    head.y + snake.size > crown.y
-) {
+        crown.visible &&
+        head.x < crown.x + crown.size &&
+        head.x + snake.size > crown.x &&
+        head.y < crown.y + crown.size &&
+        head.y + snake.size > crown.y
+    ) {
         crown.visible = false;
         crown.active = true;
         crown.timer = 50;
@@ -616,22 +632,21 @@ function checkCrownCollision() {
     }
 
     if (crown.active) {
+        crown.timer--;
 
-    crown.timer--;
+        if (crown.timer === 15) {
+            showNotification("⚠️ Crown power ending!", 1500);
+        }
 
-    if (crown.timer === 15) {
-        showNotification("⚠️ Crown power ending!", 1500);
-    }
-
-    if (crown.timer <= 0) {
+        if (crown.timer <= 0) {
             crown.active = false;
             crownRespawnCounter = 0;
 
             cuzon.emoji = "🤢";
 
             showNotification("⚠️ Cuzon is moving again!", 3000);
+        }
     }
-}
 
     if (!crown.visible && !crown.active && cuzonChaseMode && !gameOver && !gameWon) {
         crownRespawnCounter++;
@@ -650,44 +665,44 @@ function checkFoodCollision() {
     const head = snake.body[0];
 
     if (
-    head.x < food.x + food.size &&
-    head.x + snake.size > food.x &&
-    head.y < food.y + food.size &&
-    head.y + snake.size > food.y
-) {
+        head.x < food.x + food.size &&
+        head.x + snake.size > food.x &&
+        head.y < food.y + food.size &&
+        head.y + snake.size > food.y
+    ) {
         score++;
         snake.growing = true;
+
         heartPop.currentTime = 0;
         heartPop.play();
-        
+
         createHeartEffect(food.x, food.y);
+
         if (score === 10) {
-    showNotification("❤️ Tahirah is getting stronger! Cuzon is chasing now! 🤢", 3500);
+            cuzonChaseMode = true;
+            cuzonChaseDelay = 1;
 
-    cuzonChaseMode = true;
-    cuzonChaseDelay = 1;
+            moveCrown();
+            crown.visible = true;
 
-    moveCrown();
-    crown.visible = true;
+            showNotification("❤️ Tahirah is getting stronger! Cuzon is chasing now! 👑", 3500);
+        }
 
-    showNotification("👑 Crown power-up appeared!", 3000);
-}
         if (score >= winningScore) {
-    gameWon = true;
+            gameWon = true;
 
-    stopMusic();
-    updateHighScore();
+            stopMusic();
+            updateHighScore();
 
-    winSound.currentTime = 0;
-    setTimeout(function () {
-    winSound.currentTime = 0;
-    winSound.play();
-}, 700);
+            setTimeout(function() {
+                winSound.currentTime = 0;
+                winSound.play();
+            }, 700);
 
-    showNotification("🏆 Tahirah Wins!", 3500);
+            showNotification("🏆 Tahirah Wins!", 3500);
 
-    return;
-}
+            return;
+        }
 
         moveFood();
     }
@@ -704,6 +719,7 @@ function checkWallCollision() {
     ) {
         gameOver = true;
         gameOverReason = "Tahirah ran out of room! 😭";
+
         stopMusic();
         updateHighScore();
 
@@ -716,18 +732,19 @@ function checkCuzonCollision() {
     const head = snake.body[0];
 
     if (
-    head.x < cuzon.x + cuzon.size &&
-    head.x + snake.size > cuzon.x &&
-    head.y < cuzon.y + cuzon.size &&
-    head.y + snake.size > cuzon.y
-) {
+        head.x < cuzon.x + cuzon.size &&
+        head.x + snake.size > cuzon.x &&
+        head.y < cuzon.y + cuzon.size &&
+        head.y + snake.size > cuzon.y
+    ) {
         gameOver = true;
         gameOverReason = "Cuzon got too close and got SICK! 🤢";
-        stopMusic();
-updateHighScore();
 
-eddieLaugh.currentTime = 0;
-eddieLaugh.play();
+        stopMusic();
+        updateHighScore();
+
+        eddieLaugh.currentTime = 0;
+        eddieLaugh.play();
     }
 }
 
@@ -758,23 +775,23 @@ function drawGameOver() {
     ctx.font = "26px Arial";
     ctx.fillText("Press R to Restart", canvas.width / 2, 415);
 
-if (Math.random() < 0.35) {
-    createBrokenHeart();
-}
-
-for (let i = brokenHearts.length - 1; i >= 0; i--) {
-
-    const heart = brokenHearts[i];
-
-    ctx.font = heart.size + "px Arial";
-    ctx.fillText("💔", heart.x, heart.y);
-
-    heart.y += heart.speed;
-
-    if (heart.y > canvas.height + 30) {
-        brokenHearts.splice(i, 1);
+    if (Math.random() < 0.35) {
+        createBrokenHeart();
     }
-}
+
+    for (let i = brokenHearts.length - 1; i >= 0; i--) {
+        const heart = brokenHearts[i];
+
+        ctx.font = heart.size + "px Arial";
+        ctx.fillText("💔", heart.x, heart.y);
+
+        heart.y += heart.speed;
+
+        if (heart.y > canvas.height + 30) {
+            brokenHearts.splice(i, 1);
+        }
+    }
+
     ctx.textAlign = "start";
 }
 
@@ -792,11 +809,11 @@ function drawWinScreen() {
     ctx.textAlign = "center";
 
     ctx.fillStyle = "#ff4fd8";
-ctx.font = "bold 48px Arial";
-ctx.fillText("YOU WIN!", canvas.width / 2, 180);
+    ctx.font = "bold 48px Arial";
+    ctx.fillText("YOU WIN!", canvas.width / 2, 180);
 
-ctx.font = "40px Arial";
-ctx.fillText("❤️", canvas.width / 2, 225);
+    ctx.font = "40px Arial";
+    ctx.fillText("❤️", canvas.width / 2, 225);
 
     ctx.fillStyle = "white";
     ctx.font = "26px Arial";
@@ -845,28 +862,29 @@ function draw() {
     }
 
     if (gameWon) {
-    drawWinScreen();
-    return;
-}
+        drawWinScreen();
+        return;
+    }
 
     if (gameOver) {
         drawGameOver();
         return;
     }
+
     if (gamePaused) {
-    drawScore();
+        drawScore();
 
-    ctx.textAlign = "center";
-    ctx.fillStyle = "white";
-    ctx.font = "bold 42px Arial";
-    ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
+        ctx.textAlign = "center";
+        ctx.fillStyle = "white";
+        ctx.font = "bold 42px Arial";
+        ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
 
-    ctx.font = "22px Arial";
-    ctx.fillText("Press P to Resume", canvas.width / 2, canvas.height / 2 + 45);
+        ctx.font = "22px Arial";
+        ctx.fillText("Press P to Resume", canvas.width / 2, canvas.height / 2 + 45);
 
-    ctx.textAlign = "start";
-    return;
-}
+        ctx.textAlign = "start";
+        return;
+    }
 
     if (gameBackground.complete) {
         ctx.drawImage(gameBackground, 0, 0, canvas.width, canvas.height);
@@ -880,6 +898,7 @@ function draw() {
 
     moveSnake();
     moveCuzon();
+
     checkWallCollision();
     checkCuzonCollision();
     checkFoodCollision();
