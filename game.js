@@ -8,6 +8,8 @@ const ctx = canvas.getContext("2d");
 
 const eddieLaugh = new Audio("assets/sounds/eddie-haha.mp3");
 eddieLaugh.volume = 1.0;
+const princeDidThat = new Audio("assets/sounds/prince-did-that.mp3");
+princeDidThat.volume = 0.25;
 
 const bgMusic = document.getElementById("bgMusic");
 bgMusic.volume = 0.35;
@@ -19,6 +21,7 @@ muteButton.addEventListener("click", function() {
 
     bgMusic.muted = muted;
     eddieLaugh.muted = muted;
+    princeDidThat.muted = muted;
 
     muteButton.textContent = muted
         ? "🔇 Sound Off"
@@ -80,6 +83,19 @@ let cuzonChaseDelay = 4;
 let touchStartX = 0;
 let touchStartY = 0;
 let heartEffects = [];
+let notificationText = "";
+let notificationTimer = 0;
+let crownRespawnCounter = 0;
+const crownRespawnDelay = 80;
+const crown = {
+    x: 200,
+    y: 200,
+    size: 20,
+    emoji: "👑",
+    visible: false,
+    active: false,
+    timer: 0
+};
 
 function randomGridPosition(size, axis) {
     if (axis === "x") {
@@ -160,6 +176,9 @@ function moveCuzon() {
     if (!gameStarted || gameOver || gameWon) {
         return;
     }
+    if (crown.active) {
+    return;
+}
 
     // BEFORE 10 hearts: slow teleport behavior
     if (!cuzonChaseMode) {
@@ -330,6 +349,13 @@ function drawCuzon() {
     ctx.fillText(cuzon.emoji, cuzon.x, cuzon.y + 20);
 }
 
+function drawCrown() {
+    if (!crown.visible) return;
+
+    ctx.font = "24px Arial";
+    ctx.fillText(crown.emoji, crown.x, crown.y + 20);
+}
+
 function drawScore() {
     ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
     ctx.fillRect(0, 0, canvas.width, topHudHeight);
@@ -347,19 +373,25 @@ function drawScore() {
     ctx.fillText("Best: " + highScore, 20, 65);
 }
 
+function showNotification(text, time) {
+    notificationText = text;
+    notificationTimer = time;
+}
+
 function drawLoveMessage() {
-    if (score >= 10) {
+    if (notificationTimer > 0) {
         ctx.textAlign = "center";
 
-        ctx.fillStyle = "pink";
-        ctx.font = "24px Arial";
-        ctx.fillText(
-            "Tahirah is getting stronger! Cuzon is chasing now! 🤢",
-            canvas.width / 2,
-            canvas.height - 22
-        );
+        ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+        ctx.fillRect(0, canvas.height - 55, canvas.width, 55);
+
+        ctx.fillStyle = "gold";
+        ctx.font = "22px Arial";
+        ctx.fillText(notificationText, canvas.width / 2, canvas.height - 22);
 
         ctx.textAlign = "start";
+
+        notificationTimer--;
     }
 }
 
@@ -421,16 +453,71 @@ function createHeartEffect(x, y) {
         life: 30
     });
 }
+function moveCrown() {
+    let newX;
+    let newY;
+
+    do {
+        newX = randomGridPosition(crown.size, "x");
+        newY = randomGridPosition(crown.size, "y");
+    } while (
+        isOnSnake(newX, newY) ||
+        (newX === food.x && newY === food.y) ||
+        (newX === cuzon.x && newY === cuzon.y)
+    );
+
+    crown.x = newX;
+    crown.y = newY;
+}
+
+function checkCrownCollision() {
+    const head = snake.body[0];
+
+    if (crown.visible && head.x === crown.x && head.y === crown.y) {
+        crown.visible = false;
+        crown.active = true;
+        crown.timer = 50;
+
+        princeDidThat.currentTime = 0;
+        princeDidThat.play();
+        showNotification("👑 Prince Did That! Cuzon is frozen!", 120);
+    }
+
+    if (crown.active) {
+        crown.timer--;
+
+        if (crown.timer <= 0) {
+            crown.active = false;
+            crownRespawnCounter = 0;
+        }
+    }
+
+    if (!crown.visible && !crown.active && cuzonChaseMode && !gameOver && !gameWon) {
+        crownRespawnCounter++;
+
+        if (crownRespawnCounter >= crownRespawnDelay) {
+            moveCrown();
+            crown.visible = true;
+            crownRespawnCounter = 0;
+        }
+    }
+}
+
 function checkFoodCollision() {
     const head = snake.body[0];
 
     if (head.x === food.x && head.y === food.y) {
         score++;
         snake.growing = true;
+        
         createHeartEffect(food.x, food.y);
-        if (score >= 10) {
+        if (score === 10) {showNotification("Tahirah is getting stronger! Cuzon is chasing now! 🤢", 120);
     cuzonChaseMode = true;
     cuzonChaseDelay = 1;
+
+    moveCrown();
+    crown.visible = true;
+    cuzon.active = true;
 }
         if (score >= winningScore) {
     gameWon = true;
@@ -589,9 +676,11 @@ function draw() {
     checkWallCollision();
     checkCuzonCollision();
     checkFoodCollision();
+    checkCrownCollision();
 
     drawSnake();
     drawFood();
+    drawCrown();
     drawHeartEffects();
     drawCuzon();
     drawScore();
