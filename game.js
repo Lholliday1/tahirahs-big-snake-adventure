@@ -104,7 +104,11 @@ let gameStarted = false;
 let gameOver = false;
 let gameOverReason = "";
 let gameWon = false;
+let winCelebration = false;
+let winCelebrationTimer = 0;
 let gamePaused = false;
+let winFade = false;
+let winFadeAlpha = 0;
 
 const winningScore = 25;
 const topHudHeight = 80;
@@ -695,20 +699,19 @@ function checkFoodCollision() {
         }
 
         if (score >= winningScore) {
-            gameWon = true;
+    winFade = true;
+    winFadeAlpha = 0;
 
-            stopMusic();
-            updateHighScore();
+    stopMusic();
+    updateHighScore();
 
-            setTimeout(function() {
-                winSound.currentTime = 0;
-                winSound.play();
-            }, 700);
+    showNotification("🏆 Tahirah Wins!", 2500);
 
-            showNotification("🏆 Tahirah Wins!", 3500);
+    winSound.currentTime = 0;
+    winSound.play();
 
-            return;
-        }
+    return;
+}
 
         moveFood();
     }
@@ -867,6 +870,33 @@ function draw() {
         return;
     }
 
+    if (winFade) {
+    if (gameBackground.complete) {
+        ctx.drawImage(gameBackground, 0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    drawSnake();
+    drawFood();
+    drawCrown();
+    drawHeartEffects();
+    drawCuzon();
+    drawScore();
+
+    winFadeAlpha += 0.08;
+
+    ctx.fillStyle = "rgba(0, 0, 0, " + winFadeAlpha + ")";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (winFadeAlpha >= 1) {
+        winFade = false;
+        gameWon = true;
+    }
+
+    return;
+}
     if (gameWon) {
         drawWinScreen();
         return;
@@ -878,19 +908,34 @@ function draw() {
     }
 
     if (gamePaused) {
-        drawScore();
-
-        ctx.textAlign = "center";
-        ctx.fillStyle = "white";
-        ctx.font = "bold 42px Arial";
-        ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
-
-        ctx.font = "22px Arial";
-        ctx.fillText("Press P to Resume", canvas.width / 2, canvas.height / 2 + 45);
-
-        ctx.textAlign = "start";
-        return;
+    if (gameBackground.complete) {
+        ctx.drawImage(gameBackground, 0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
+
+    drawSnake();
+    drawFood();
+    drawCrown();
+    drawCuzon();
+    drawScore();
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.60)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.textAlign = "center";
+
+    ctx.fillStyle = "white";
+    ctx.font = "bold 46px Arial";
+    ctx.fillText("⏸️ PAUSED", canvas.width / 2, canvas.height / 2);
+
+    ctx.font = "22px Arial";
+    ctx.fillText("Press P or Tap Resume", canvas.width / 2, canvas.height / 2 + 50);
+
+    ctx.textAlign = "start";
+    return;
+}
 
     if (gameBackground.complete) {
         ctx.drawImage(gameBackground, 0, 0, canvas.width, canvas.height);
@@ -904,6 +949,48 @@ function draw() {
 
     moveSnake();
     moveCuzon();
+    if (winCelebration) {
+
+    winCelebrationTimer--;
+
+    if (Math.random() < 0.6) {
+        createWinHeart();
+    }
+
+    drawSnake();
+    drawFood();
+    drawCrown();
+    drawCuzon();
+    drawHeartEffects();
+    drawScore();
+
+    for (let i = winHearts.length - 1; i >= 0; i--) {
+
+        const heart = winHearts[i];
+
+        ctx.font = heart.size + "px Arial";
+        ctx.fillText("❤️", heart.x, heart.y);
+
+        heart.y += heart.speed;
+
+        if (heart.y > canvas.height + 30) {
+            winHearts.splice(i, 1);
+        }
+    }
+
+    if (winCelebrationTimer <= 0) {
+
+        gameWon = true;
+        winCelebration = false;
+
+        setTimeout(function () {
+            winSound.currentTime = 0;
+            winSound.play();
+        }, 200);
+    }
+
+    return;
+}
 
     checkWallCollision();
     checkCuzonCollision();
