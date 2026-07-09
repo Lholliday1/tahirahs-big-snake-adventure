@@ -74,26 +74,26 @@ function startMusic() {
 }
 
 const snake = {
-    body: [{ x: 96, y: 96 }],
-    size: 24,
+    body: [{ x: 100, y: 100 }],
+    size: 20,
     color: "lime",
-    speed: 24,
+    speed: 20,
     directionX: 1,
     directionY: 0,
     growing: false
 };
 
 const food = {
-    x: 288,
-    y: 288,
-    size: 24,
+    x: 300,
+    y: 300,
+    size: 20,
     emoji: "❤️"
 };
 
 const cuzon = {
-    x: 432,
-    y: 216,
-    size: 24,
+    x: 420,
+    y: 220,
+    size: 20,
     emoji: "🤢"
 };
 
@@ -128,9 +128,9 @@ let crownRespawnCounter = 0;
 const crownRespawnDelay = 80;
 
 const crown = {
-    x: 192,
-    y: 192,
-    size: 24,
+    x: 200,
+    y: 200,
+    size: 20,
     emoji: "👑",
     visible: false,
     active: false,
@@ -456,13 +456,13 @@ function drawSnake() {
 }
 
 function drawFood() {
-    ctx.font = "30px Arial";
-    ctx.fillText(food.emoji, food.x, food.y + 22);
+    ctx.font = "24px Arial";
+    ctx.fillText(food.emoji, food.x, food.y + 20);
 }
 
 function drawCuzon() {
-    ctx.font = "30px Arial";
-    ctx.fillText(cuzon.emoji, cuzon.x, cuzon.y + 22);
+    ctx.font = "24px Arial";
+    ctx.fillText(cuzon.emoji, cuzon.x, cuzon.y + 20);
 }
 
 function drawCrown() {
@@ -477,7 +477,7 @@ function drawCrown() {
     ctx.shadowColor = "gold";
     ctx.shadowBlur = 12 + Math.sin(Date.now() / 150) * 8;
 
-    ctx.font = "34px Arial";
+    ctx.font = "28px Arial";
     ctx.fillText(crown.emoji, crown.x, crown.y + 20 + bounce);
 
     ctx.restore();

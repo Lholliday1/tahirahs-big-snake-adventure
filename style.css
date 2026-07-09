@@ -50,8 +50,8 @@ canvas {
 
     display: block;
 
-    width: min(94vw, 700px);
-    height: min(94vw, 700px);
+    width: min(92vw, 600px);
+    height: min(92vw, 600px);
 
     touch-action: none;
 }
