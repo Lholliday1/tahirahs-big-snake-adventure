@@ -12,6 +12,8 @@ const princeDidThat = new Audio("assets/sounds/prince-did-that.mp3");
 princeDidThat.volume = 0.25;
 const winSound = new Audio("assets/sounds/aww-so-cute.m4a");
 winSound.volume = 0.45;
+const heartPop = new Audio("assets/sounds/heart-pop.mp3");
+heartPop.volume = 0.02;
 
 const bgMusic = document.getElementById("bgMusic");
 bgMusic.volume = 0.35;
@@ -26,6 +28,7 @@ muteButton.addEventListener("click", function() {
     eddieLaugh.muted = muted;
     princeDidThat.muted = muted;
     winSound.muted = muted;
+    heartPop.muted = muted;
 
     muteButton.textContent = muted
         ? "🔇 Sound Off"
@@ -549,6 +552,8 @@ function checkFoodCollision() {
     if (head.x === food.x && head.y === food.y) {
         score++;
         snake.growing = true;
+        heartPop.currentTime = 0;
+        heartPop.play();
         
         createHeartEffect(food.x, food.y);
         if (score === 10) {
