@@ -4,6 +4,14 @@ const ctx = canvas.getContext("2d");
 const bgMusic = document.getElementById("bgMusic");
 bgMusic.volume = 0.35;
 
+function startMusic() {
+    bgMusic.volume = 0.35;
+
+    bgMusic.play().catch(function(error) {
+        console.log("Music could not start:", error);
+    });
+}
+
 const snake = {
     body: [{ x: 100, y: 100 }],
     size: 20,
@@ -95,7 +103,7 @@ document.addEventListener("keydown", function(event) {
 
     if (!gameStarted) {
         gameStarted = true;
-        bgMusic.play();
+        startMusic();
         return;
     }
 
@@ -117,6 +125,13 @@ document.addEventListener("keydown", function(event) {
     if (event.key === "ArrowRight" && snake.directionX !== -1) {
         snake.directionX = 1;
         snake.directionY = 0;
+    }
+});
+
+canvas.addEventListener("click", function() {
+    if (!gameStarted && !gameOver) {
+        gameStarted = true;
+        startMusic();
     }
 });
 
@@ -164,19 +179,23 @@ function drawStartScreen() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    ctx.textAlign = "center";
+
     ctx.fillStyle = "white";
     ctx.font = "34px Arial";
-    ctx.fillText("Tahirah's Big", 175, 150);
-    ctx.fillText("Snake Adventure 🐍", 125, 200);
+    ctx.fillText("Tahirah's Big", canvas.width / 2, 150);
+    ctx.fillText("Snake Adventure 🐍", canvas.width / 2, 200);
 
     ctx.font = "20px Arial";
-    ctx.fillText("Collect the hearts before Cuzon gets sick 🤢", 85, 285);
+    ctx.fillText("Collect the hearts before Cuzon gets sick 🤢", canvas.width / 2, 285);
 
     ctx.font = "22px Arial";
-    ctx.fillText("Developed by LaQuinton Holliday", 130, 340);
+    ctx.fillText("Developed by LaQuinton Holliday", canvas.width / 2, 340);
 
     ctx.font = "24px Arial";
-    ctx.fillText("Press Any Key to Begin", 165, 430);
+    ctx.fillText("Press Any Key or Click to Begin", canvas.width / 2, 430);
+
+    ctx.textAlign = "start";
 }
 
 function checkFoodCollision() {
@@ -218,15 +237,23 @@ function drawGameOver() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    ctx.textAlign = "center";
+
     ctx.fillStyle = "red";
-    ctx.font = "48px Arial";
-    ctx.fillText("GAME OVER", 145, 190);
+    ctx.font = "56px Arial";
+    ctx.fillText("GAME OVER", canvas.width / 2, 190);
 
     ctx.fillStyle = "white";
-    ctx.font = "24px Arial";
-    ctx.fillText(gameOverReason, 110, 260);
-    ctx.fillText("Final Hearts: " + score, 205, 330);
-    ctx.fillText("Press R to Restart", 165, 390);
+    ctx.font = "26px Arial";
+    ctx.fillText(gameOverReason, canvas.width / 2, 270);
+
+    ctx.font = "28px Arial";
+    ctx.fillText("Final Hearts: " + score, canvas.width / 2, 345);
+
+    ctx.font = "26px Arial";
+    ctx.fillText("Press R to Restart", canvas.width / 2, 415);
+
+    ctx.textAlign = "start";
 }
 
 function draw() {
