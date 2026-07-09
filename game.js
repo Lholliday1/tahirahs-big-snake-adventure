@@ -3,49 +3,6 @@ gameBackground.src = "assets/images/game-background.jpeg";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-function resizeCanvas() {
-    const gridSize = 20;
-
-    if (window.innerWidth <= 700) {
-        const mobileWidth = Math.floor(window.innerWidth / gridSize) * gridSize;
-        const mobileHeight = Math.floor(window.innerHeight / gridSize) * gridSize;
-
-        canvas.width = mobileWidth;
-        canvas.height = mobileHeight;
-
-        canvas.style.width = mobileWidth + "px";
-        canvas.style.height = mobileHeight + "px";
-    } else {
-        canvas.width = 600;
-        canvas.height = 600;
-
-        canvas.style.width = "600px";
-        canvas.style.height = "600px";
-    }
-}
-
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
-function resizeCanvas() {
-
-    if (window.innerWidth < 700) {
-
-        const size = Math.min(window.innerWidth - 20, window.innerHeight - 120);
-
-        canvas.width = size;
-        canvas.height = size;
-
-    } else {
-
-        canvas.width = 600;
-        canvas.height = 600;
-
-    }
-}
-
-resizeCanvas();
-
-window.addEventListener("resize", resizeCanvas);
 
 const eddieLaugh = new Audio("assets/sounds/eddie-haha.mp3");
 eddieLaugh.volume = 1.0;
@@ -321,19 +278,24 @@ function drawStartScreen() {
 
     ctx.textAlign = "center";
 
+    const scale = canvas.width / 600;
+
     ctx.fillStyle = "white";
-    ctx.font = "34px Arial";
-    ctx.fillText("Tahirah's Big", canvas.width / 2, 150);
-    ctx.fillText("Snake Adventure 🐍", canvas.width / 2, 200);
+    ctx.font = `bold ${34 * scale}px Arial`;
+    ctx.fillText("Tahirah's Big", canvas.width / 2, 150 * scale);
+    ctx.fillText("Snake Adventure 🐍", canvas.width / 2, 200 * scale);
 
-    ctx.font = "20px Arial";
-    ctx.fillText("Collect the hearts before Cuzon gets sick 🤢", canvas.width / 2, 285);
+    ctx.font = `${20 * scale}px Arial`;
+    ctx.fillText("Collect the hearts before", canvas.width / 2, 285 * scale);
+    ctx.fillText("Cuzon gets sick 🤢", canvas.width / 2, 315 * scale);
 
-    ctx.font = "22px Arial";
-    ctx.fillText("Developed by LaQuinton Holliday", canvas.width / 2, 340);
+    ctx.font = `${22 * scale}px Arial`;
+    ctx.fillText("Developed by", canvas.width / 2, 365 * scale);
+    ctx.fillText("LaQuinton Holliday", canvas.width / 2, 395 * scale);
 
-    ctx.font = "24px Arial";
-    ctx.fillText("Press Any Key, Click, or Swipe to Begin", canvas.width / 2, 430);
+    ctx.font = `${24 * scale}px Arial`;
+    ctx.fillText("Press Any Key, Click,", canvas.width / 2, 465 * scale);
+    ctx.fillText("or Swipe to Begin", canvas.width / 2, 495 * scale);
 
     ctx.textAlign = "start";
 }
