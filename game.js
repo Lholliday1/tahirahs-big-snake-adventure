@@ -19,6 +19,7 @@ const bgMusic = document.getElementById("bgMusic");
 bgMusic.volume = 0.35;
 const muteButton = document.getElementById("muteButton");
 const notificationBar = document.getElementById("notificationBar");
+const tipBar = document.getElementById("tipBar");
 let muted = false;
 
 muteButton.addEventListener("click", function() {
@@ -106,6 +107,29 @@ const crown = {
     active: false,
     timer: 0
 };
+const tips = [
+    "💡 Swipe or use Arrow Keys to move",
+    "❤️ Collect 25 Hearts to Win",
+    "👑 Crown freezes Cuzon",
+    "🤢 Avoid Cuzon!",
+    "🔊 Tap Sound to mute/unmute",
+    "🏆 Beat your High Score!"
+];
+
+let currentTip = 0;
+let tipInterval = null;
+
+
+function startTips() {
+    if (tipInterval !== null) {
+        return;
+    }
+
+    tipInterval = setInterval(function() {
+        currentTip = (currentTip + 1) % tips.length;
+        tipBar.textContent = tips[currentTip];
+    }, 4000);
+}
 
 function randomGridPosition(size, axis) {
     if (axis === "x") {
@@ -128,7 +152,12 @@ function isOnSnake(x, y) {
 function startGame() {
     if (!gameStarted && !gameOver && !gameWon) {
         gameStarted = true;
+
         startMusic();
+        startTips();
+
+        // Show the very first tip immediately
+        tipBar.textContent = tips[0];
     }
 }
 

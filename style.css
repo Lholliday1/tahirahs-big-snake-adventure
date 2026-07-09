@@ -99,3 +99,12 @@ canvas {
         0 0 8px gold,
         0 0 18px orange;
 }
+
+#tipBar {
+    color: white;
+    font-size: 15px;
+    text-align: center;
+    min-height: 20px;
+    opacity: 0.85;
+    transition: opacity 0.4s ease;
+}
