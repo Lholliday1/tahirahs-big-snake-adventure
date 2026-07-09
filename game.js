@@ -9,6 +9,8 @@ bgMusic.volume = 0.35;
 
 const introBackground = new Image();
 introBackground.src = "assets/images/intro-background.jpeg";
+const gameOverBackground = new Image();
+gameOverBackground.src = "assets/images/game-over.jpeg";
 
 function startMusic() {
     bgMusic.volume = 0.35;
@@ -318,7 +320,14 @@ eddieLaugh.play();
 }
 
 function drawGameOver() {
-    ctx.fillStyle = "black";
+    if (gameOverBackground.complete) {
+        ctx.drawImage(gameOverBackground, 0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.textAlign = "center";
