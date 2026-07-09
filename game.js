@@ -377,9 +377,8 @@ function checkFoodCollision() {
         score++;
         snake.growing = true;
         if (score >= 10) {
-    cuzonChaseMode = true;
+             cuzonChaseMode = true;
 }
-
         if (score >= winningScore) {
     gameWon = true;
     stopMusic();
