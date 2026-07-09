@@ -70,7 +70,7 @@ function isOnSnake(x, y) {
 }
 
 function startGame() {
-    if (!gameStarted && !gameOver) {
+    if (!gameStarted && !gameOver && !gameWon) {
         gameStarted = true;
         startMusic();
     }
@@ -127,7 +127,7 @@ function moveFood() {
 }
 
 function moveCuzon() {
-    if (!gameStarted || gameOver) {
+    if (!gameStarted || gameOver || gameWon) {
         return;
     }
 
@@ -171,10 +171,10 @@ document.addEventListener("keydown", function(event) {
 });
 
 canvas.addEventListener("click", function() {
-    if (gameOver) {
-        location.reload();
-        return;
-    }
+    if (gameOver || gameWon) {
+    location.reload();
+    return;
+}
 
     startGame();
 });
@@ -195,10 +195,10 @@ canvas.addEventListener("touchmove", function(event) {
 canvas.addEventListener("touchend", function(event) {
     event.preventDefault();
 
-    if (gameOver) {
-        location.reload();
-        return;
-    }
+    if (gameOver || gameWon) {
+    location.reload();
+    return;
+}
 
     const touchEndX = event.changedTouches[0].clientX;
     const touchEndY = event.changedTouches[0].clientY;
