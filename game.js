@@ -3,6 +3,49 @@ gameBackground.src = "assets/images/game-background.jpeg";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+function resizeCanvas() {
+    const gridSize = 20;
+
+    if (window.innerWidth <= 700) {
+        const mobileWidth = Math.floor(window.innerWidth / gridSize) * gridSize;
+        const mobileHeight = Math.floor(window.innerHeight / gridSize) * gridSize;
+
+        canvas.width = mobileWidth;
+        canvas.height = mobileHeight;
+
+        canvas.style.width = mobileWidth + "px";
+        canvas.style.height = mobileHeight + "px";
+    } else {
+        canvas.width = 600;
+        canvas.height = 600;
+
+        canvas.style.width = "600px";
+        canvas.style.height = "600px";
+    }
+}
+
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+function resizeCanvas() {
+
+    if (window.innerWidth < 700) {
+
+        const size = Math.min(window.innerWidth - 20, window.innerHeight - 120);
+
+        canvas.width = size;
+        canvas.height = size;
+
+    } else {
+
+        canvas.width = 600;
+        canvas.height = 600;
+
+    }
+}
+
+resizeCanvas();
+
+window.addEventListener("resize", resizeCanvas);
 
 const eddieLaugh = new Audio("assets/sounds/eddie-haha.mp3");
 eddieLaugh.volume = 1.0;

@@ -6,7 +6,7 @@
 
 html, body {
     width: 100%;
-    min-height: 100%;
+    height: 100%;
     overflow: hidden;
 }
 
@@ -24,15 +24,11 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
-    width: 100%;
-    height: 100vh;
-    padding: 10px;
 }
 
 h1 {
     color: white;
-    font-size: clamp(20px, 5vw, 36px);
+    font-size: 36px;
     margin-bottom: 12px;
     text-align: center;
 }
@@ -47,27 +43,27 @@ canvas {
         0 0 40px deeppink;
 
     display: block;
-
-    width: min(92vw, 600px);
-    height: min(92vw, 600px);
-
     touch-action: none;
 }
 
-/* Phone-only layout */
+/* Mobile portrait mode */
 @media (max-width: 700px) {
-    #gameContainer {
-        padding: 6px;
+    body {
+        align-items: center;
     }
 
     h1 {
-        font-size: 24px;
-        margin-bottom: 8px;
+        display: none;
+    }
+
+    #gameContainer {
+        width: 100vw;
+        height: 100vh;
     }
 
     canvas {
-        width: 96vw;
-        height: 96vw;
-        max-height: calc(100vh - 150px);
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
     }
 }
