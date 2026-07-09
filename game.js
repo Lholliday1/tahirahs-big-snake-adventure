@@ -14,6 +14,8 @@ const introBackground = new Image();
 introBackground.src = "assets/images/intro-background.jpeg";
 const gameOverBackground = new Image();
 gameOverBackground.src = "assets/images/game-over.jpeg";
+const winBackground = new Image();
+winBackground.src = "assets/images/win-screen.jpeg";
 
 function startMusic() {
     bgMusic.volume = 0.35;
@@ -51,6 +53,8 @@ let score = 0;
 let gameStarted = false;
 let gameOver = false;
 let gameOverReason = "";
+let gameWon = false;
+const winningScore = 25;
 
 let touchStartX = 0;
 let touchStartY = 0;
@@ -140,9 +144,9 @@ function moveCuzon() {
 }
 
 document.addEventListener("keydown", function(event) {
-    if (gameOver && event.key.toLowerCase() === "r") {
-        location.reload();
-    }
+    if ((gameOver || gameWon) && event.key.toLowerCase() === "r") {
+    location.reload();
+}
 
     if (!gameStarted) {
         startGame();
@@ -297,6 +301,13 @@ function checkFoodCollision() {
     if (head.x === food.x && head.y === food.y) {
         score++;
         snake.growing = true;
+
+        if (score >= winningScore) {
+            gameWon = true;
+            stopMusic();
+            return;
+        }
+
         moveFood();
     }
 }
@@ -362,11 +373,45 @@ function drawGameOver() {
     ctx.textAlign = "start";
 }
 
+function drawWinScreen() {
+    if (winBackground.complete) {
+        ctx.drawImage(winBackground, 0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.30)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.textAlign = "center";
+
+    ctx.fillStyle = "#ff4fd8";
+    ctx.font = "bold 48px Arial";
+    ctx.fillText("YOU WIN! ❤️", canvas.width / 2, 180);
+
+    ctx.fillStyle = "white";
+    ctx.font = "26px Arial";
+    ctx.fillText("Tahirah collected all 25 hearts!", canvas.width / 2, 260);
+
+    ctx.font = "24px Arial";
+    ctx.fillText("Cuzon could not stop the love! 🤢", canvas.width / 2, 320);
+
+    ctx.font = "26px Arial";
+    ctx.fillText("Press R to Restart", canvas.width / 2, 410);
+
+    ctx.textAlign = "start";
+}
 function draw() {
     if (!gameStarted) {
         drawStartScreen();
         return;
     }
+
+    if (gameWon) {
+    drawWinScreen();
+    return;
+}
 
     if (gameOver) {
         drawGameOver();
