@@ -303,10 +303,18 @@ function drawStartScreen() {
     ctx.fillText("Collect the hearts before", canvas.width / 2, 285 * scale);
     ctx.fillText("Cuzon gets sick 🤢", canvas.width / 2, 315 * scale);
 
-    ctx.font = `${22 * scale}px Arial`;
-    ctx.fillText("Developed by", canvas.width / 2, 365 * scale);
-    ctx.fillText("LaQuinton Holliday", canvas.width / 2, 395 * scale);
+    // Developer credit - bottom right
+ctx.textAlign = "right";
 
+ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+ctx.font = `${13 * scale}px Arial`;
+ctx.fillText("Developed by LaQuinton Holliday", canvas.width - 14, canvas.height - 34);
+
+ctx.fillStyle = "rgba(255, 192, 203, 0.95)";
+ctx.font = `${12 * scale}px Arial`;
+ctx.fillText("Music by LaQuinton Holliday", canvas.width - 14, canvas.height - 16);
+
+ctx.textAlign = "center";
     ctx.font = `${24 * scale}px Arial`;
     ctx.fillText("Press Any Key, Click,", canvas.width / 2, 465 * scale);
     ctx.fillText("or Swipe to Begin", canvas.width / 2, 495 * scale);
