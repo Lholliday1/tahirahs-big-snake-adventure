@@ -60,7 +60,7 @@ const topHudHeight = 80;
 const bottomHudHeight = 0;
 let cuzonChaseMode = false;
 let cuzonMoveCounter = 0;
-const cuzonChaseDelay = 4;
+let cuzonChaseDelay = 4;
 
 let touchStartX = 0;
 let touchStartY = 0;
@@ -145,39 +145,65 @@ function moveCuzon() {
         return;
     }
 
+    // BEFORE 10 hearts: slow teleport behavior
     if (!cuzonChaseMode) {
+        cuzonMoveCounter++;
+
+        if (cuzonMoveCounter < 17) {
+            return;
+        }
+
+        cuzonMoveCounter = 0;
+
         let newX;
         let newY;
 
         do {
             newX = randomGridPosition(cuzon.size, "x");
             newY = randomGridPosition(cuzon.size, "y");
-        } while (isOnSnake(newX, newY) || (newX === food.x && newY === food.y));
+        } while (
+            isOnSnake(newX, newY) ||
+            (newX === food.x && newY === food.y)
+        );
 
         cuzon.x = newX;
         cuzon.y = newY;
         return;
     }
 
-    cuzonMoveCounter++;
+    // AFTER 10 hearts: natural chase
+cuzonMoveCounter++;
 
-    if (cuzonMoveCounter < cuzonChaseDelay) {
-        return;
-    }
+if (cuzonMoveCounter < 2) {
+    return;
+}
 
-    cuzonMoveCounter = 0;
+cuzonMoveCounter = 0;
 
-    const head = snake.body[0];
+const head = snake.body[0];
 
-    if (cuzon.x < head.x) {
+const distanceX = head.x - cuzon.x;
+const distanceY = head.y - cuzon.y;
+
+// Sometimes Cuzon hesitates so it feels less robotic
+if (Math.random() < 0.15) {
+    return;
+}
+
+// Move on the axis with the bigger distance
+if (Math.abs(distanceX) > Math.abs(distanceY)) {
+    if (distanceX > 0) {
         cuzon.x += cuzon.size;
-    } else if (cuzon.x > head.x) {
+    } else if (distanceX < 0) {
         cuzon.x -= cuzon.size;
-    } else if (cuzon.y < head.y) {
+    }
+} else {
+    if (distanceY > 0) {
         cuzon.y += cuzon.size;
-    } else if (cuzon.y > head.y) {
+    } else if (distanceY < 0) {
         cuzon.y -= cuzon.size;
     }
+}
 }
 
 document.addEventListener("keydown", function(event) {
@@ -377,7 +403,8 @@ function checkFoodCollision() {
         score++;
         snake.growing = true;
         if (score >= 10) {
-             cuzonChaseMode = true;
+    cuzonChaseMode = true;
+    cuzonChaseDelay = 1;
 }
         if (score >= winningScore) {
     gameWon = true;
@@ -509,6 +536,7 @@ function draw() {
     }
 
     moveSnake();
+    moveCuzon();
     checkWallCollision();
     checkCuzonCollision();
     checkFoodCollision();
@@ -521,4 +549,3 @@ function draw() {
 }
 
 setInterval(draw, 150);
-setInterval(moveCuzon, 150);
