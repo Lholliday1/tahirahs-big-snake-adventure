@@ -104,8 +104,6 @@ let gameStarted = false;
 let gameOver = false;
 let gameOverReason = "";
 let gameWon = false;
-let winCelebration = false;
-let winCelebrationTimer = 0;
 let gamePaused = false;
 let winFade = false;
 let winFadeAlpha = 0;
@@ -623,12 +621,10 @@ function checkCrownCollision() {
     const head = snake.body[0];
 
     if (
-        crown.visible &&
-        head.x < crown.x + crown.size &&
-        head.x + snake.size > crown.x &&
-        head.y < crown.y + crown.size &&
-        head.y + snake.size > crown.y
-    ) {
+    crown.visible &&
+    head.x === crown.x &&
+    head.y === crown.y
+) {
         crown.visible = false;
         crown.active = true;
         crown.timer = 50;
@@ -949,48 +945,6 @@ function draw() {
 
     moveSnake();
     moveCuzon();
-    if (winCelebration) {
-
-    winCelebrationTimer--;
-
-    if (Math.random() < 0.6) {
-        createWinHeart();
-    }
-
-    drawSnake();
-    drawFood();
-    drawCrown();
-    drawCuzon();
-    drawHeartEffects();
-    drawScore();
-
-    for (let i = winHearts.length - 1; i >= 0; i--) {
-
-        const heart = winHearts[i];
-
-        ctx.font = heart.size + "px Arial";
-        ctx.fillText("❤️", heart.x, heart.y);
-
-        heart.y += heart.speed;
-
-        if (heart.y > canvas.height + 30) {
-            winHearts.splice(i, 1);
-        }
-    }
-
-    if (winCelebrationTimer <= 0) {
-
-        gameWon = true;
-        winCelebration = false;
-
-        setTimeout(function () {
-            winSound.currentTime = 0;
-            winSound.play();
-        }, 200);
-    }
-
-    return;
-}
 
     checkWallCollision();
     checkCuzonCollision();
