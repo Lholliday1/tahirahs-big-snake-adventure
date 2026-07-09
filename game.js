@@ -10,6 +10,8 @@ const eddieLaugh = new Audio("assets/sounds/eddie-haha.mp3");
 eddieLaugh.volume = 1.0;
 const princeDidThat = new Audio("assets/sounds/prince-did-that.mp3");
 princeDidThat.volume = 0.25;
+const winSound = new Audio("assets/sounds/aww-so-cute.m4a");
+winSound.volume = 0.45;
 
 const bgMusic = document.getElementById("bgMusic");
 bgMusic.volume = 0.35;
@@ -23,6 +25,7 @@ muteButton.addEventListener("click", function() {
     bgMusic.muted = muted;
     eddieLaugh.muted = muted;
     princeDidThat.muted = muted;
+    winSound.muted = muted;
 
     muteButton.textContent = muted
         ? "🔇 Sound Off"
@@ -84,6 +87,9 @@ let cuzonChaseDelay = 4;
 let touchStartX = 0;
 let touchStartY = 0;
 let heartEffects = [];
+let winHearts = [];
+let brokenHearts = [];
+
 let notificationText = "";
 let notificationTimer = 0;
 let crownRespawnCounter = 0;
@@ -448,9 +454,36 @@ function createHeartEffect(x, y) {
         x: x,
         y: y,
         text: "+1 ❤️",
-        life: 30
+        life: 18,
+        maxLife: 18
     });
 }
+
+function createWinHeart() {
+
+    winHearts.push({
+        x: Math.random() * canvas.width,
+        y: -30,
+
+        speed: 2 + Math.random() * 2,
+
+        size: 18 + Math.random() * 12
+    });
+
+}
+function createBrokenHeart() {
+
+    brokenHearts.push({
+        x: Math.random() * canvas.width,
+        y: -30,
+
+        speed: 2 + Math.random() * 2,
+
+        size: 18 + Math.random() * 12
+    });
+
+}
+
 function moveCrown() {
     let newX;
     let newY;
@@ -531,8 +564,18 @@ function checkFoodCollision() {
 }
         if (score >= winningScore) {
     gameWon = true;
+
     stopMusic();
     updateHighScore();
+
+    winSound.currentTime = 0;
+    setTimeout(function () {
+    winSound.currentTime = 0;
+    winSound.play();
+}, 700);
+
+    showNotification("🏆 Tahirah Wins!", 3500);
+
     return;
 }
 
@@ -600,6 +643,39 @@ function drawGameOver() {
     ctx.font = "26px Arial";
     ctx.fillText("Press R to Restart", canvas.width / 2, 415);
 
+    if (Math.random() < 0.35) {
+    createWinHeart();
+}
+
+for (let i = winHearts.length - 1; i >= 0; i--) {
+    const heart = winHearts[i];
+
+    ctx.font = heart.size + "px Arial";
+    ctx.fillText("❤️", heart.x, heart.y);
+
+    heart.y += heart.speed;
+
+    if (heart.y > canvas.height + 30) {
+        winHearts.splice(i, 1);
+    }
+}
+if (Math.random() < 0.35) {
+    createBrokenHeart();
+}
+
+for (let i = brokenHearts.length - 1; i >= 0; i--) {
+
+    const heart = brokenHearts[i];
+
+    ctx.font = heart.size + "px Arial";
+    ctx.fillText("💔", heart.x, heart.y);
+
+    heart.y += heart.speed;
+
+    if (heart.y > canvas.height + 30) {
+        brokenHearts.splice(i, 1);
+    }
+}
     ctx.textAlign = "start";
 }
 
@@ -640,12 +716,19 @@ function drawHeartEffects() {
     for (let i = heartEffects.length - 1; i >= 0; i--) {
         const effect = heartEffects[i];
 
+        const fade = effect.life / effect.maxLife;
+
+        ctx.save();
+
+        ctx.globalAlpha = fade;
         ctx.textAlign = "center";
         ctx.fillStyle = "pink";
-        ctx.font = "22px Arial";
+        ctx.font = "bold 22px Arial";
         ctx.fillText(effect.text, effect.x + 10, effect.y);
 
-        effect.y -= 1;
+        ctx.restore();
+
+        effect.y -= 2;
         effect.life--;
 
         if (effect.life <= 0) {
@@ -655,6 +738,7 @@ function drawHeartEffects() {
 
     ctx.textAlign = "start";
 }
+
 function draw() {
     if (!gameStarted) {
         drawStartScreen();
