@@ -1,6 +1,9 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+const eddieLaugh = new Audio("assets/sounds/eddie-haha.mp3");
+eddieLaugh.volume = 1.0;
+
 const bgMusic = document.getElementById("bgMusic");
 bgMusic.volume = 0.35;
 
@@ -295,6 +298,9 @@ function checkWallCollision() {
         gameOver = true;
         gameOverReason = "Tahirah ran out of room! 😭";
         stopMusic();
+
+eddieLaugh.currentTime = 0;
+eddieLaugh.play();
     }
 }
 
@@ -305,6 +311,9 @@ function checkCuzonCollision() {
         gameOver = true;
         gameOverReason = "Cuzon got too close and got SICK! 🤢";
         stopMusic();
+
+eddieLaugh.currentTime = 0;
+eddieLaugh.play();
     }
 }
 
