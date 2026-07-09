@@ -99,6 +99,10 @@ const cuzon = {
 
 let score = 0;
 let highScore = localStorage.getItem("tahirahHighScore") || 0;
+let bonusScore = 0;
+let combo = 1;
+let comboTimer = 0;
+const comboTimeLimit = 35;
 
 let gameStarted = false;
 let gameOver = false;
@@ -506,8 +510,9 @@ function drawScore() {
     ctx.shadowColor = "black";
     ctx.shadowBlur = 6;
 
-    ctx.fillText("Hearts: " + score, 24, 14);
-    ctx.fillText("Best: " + highScore, 24, 44);
+    ctx.fillText("Hearts: " + score, 24, 10);
+    ctx.fillText("Best: " + highScore, 24, 36);
+    ctx.fillText("Combo: x" + combo, 24, 62);
 
     ctx.restore();
 }
@@ -678,6 +683,17 @@ function checkFoodCollision() {
     ) {
         score++;
         snake.growing = true;
+        if (comboTimer > 0) {
+    combo++;
+} else {
+    combo = 1;
+}
+
+comboTimer = comboTimeLimit;
+bonusScore += combo;
+if (combo >= 2) {
+    showNotification("🔥 Combo x" + combo + "!", 1200);
+}
 
         heartPop.currentTime = 0;
         heartPop.play();
@@ -946,6 +962,14 @@ function draw() {
     moveSnake();
     moveCuzon();
 
+    if (comboTimer > 0) {
+    comboTimer--;
+    setGameSpeed(110);
+} else {
+    combo = 1;
+    setGameSpeed(150);
+}
+
     checkWallCollision();
     checkCuzonCollision();
     checkFoodCollision();
@@ -959,4 +983,16 @@ function draw() {
     drawScore();
 }
 
-setInterval(draw, 150);
+let gameLoopSpeed = 150;
+let gameLoop = setInterval(draw, gameLoopSpeed);
+
+function setGameSpeed(newSpeed) {
+    if (gameLoopSpeed === newSpeed) {
+        return;
+    }
+
+    gameLoopSpeed = newSpeed;
+
+    clearInterval(gameLoop);
+    gameLoop = setInterval(draw, gameLoopSpeed);
+}
