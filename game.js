@@ -14,6 +14,7 @@ princeDidThat.volume = 0.25;
 const bgMusic = document.getElementById("bgMusic");
 bgMusic.volume = 0.35;
 const muteButton = document.getElementById("muteButton");
+const notificationBar = document.getElementById("notificationBar");
 let muted = false;
 
 muteButton.addEventListener("click", function() {
@@ -352,8 +353,17 @@ function drawCuzon() {
 function drawCrown() {
     if (!crown.visible) return;
 
-    ctx.font = "24px Arial";
-    ctx.fillText(crown.emoji, crown.x, crown.y + 20);
+    const bounce = Math.sin(Date.now() / 150) * 5;
+
+    ctx.save();
+
+    ctx.shadowColor = "gold";
+    ctx.shadowBlur = 18;
+
+    ctx.font = "28px Arial";
+    ctx.fillText(crown.emoji, crown.x, crown.y + 20 + bounce);
+
+    ctx.restore();
 }
 
 function drawScore() {
@@ -374,25 +384,13 @@ function drawScore() {
 }
 
 function showNotification(text, time) {
-    notificationText = text;
-    notificationTimer = time;
-}
+    notificationBar.textContent = text;
 
-function drawLoveMessage() {
-    if (notificationTimer > 0) {
-        ctx.textAlign = "center";
+    clearTimeout(notificationBar.timeout);
 
-        ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
-        ctx.fillRect(0, canvas.height - 55, canvas.width, 55);
-
-        ctx.fillStyle = "gold";
-        ctx.font = "22px Arial";
-        ctx.fillText(notificationText, canvas.width / 2, canvas.height - 22);
-
-        ctx.textAlign = "start";
-
-        notificationTimer--;
-    }
+    notificationBar.timeout = setTimeout(function() {
+        notificationBar.textContent = "";
+    }, time);
 }
 
 function drawStartScreen() {
@@ -478,9 +476,12 @@ function checkCrownCollision() {
         crown.active = true;
         crown.timer = 50;
 
+        cuzon.emoji = "🥶";
+
         princeDidThat.currentTime = 0;
         princeDidThat.play();
-        showNotification("👑 Prince Did That! Cuzon is frozen!", 120);
+
+        showNotification("👑 Prince Did That! Cuzon is frozen!", 3500);
     }
 
     if (crown.active) {
@@ -489,6 +490,10 @@ function checkCrownCollision() {
         if (crown.timer <= 0) {
             crown.active = false;
             crownRespawnCounter = 0;
+
+            cuzon.emoji = "🤢";
+
+            showNotification("⚠️ Cuzon is moving again!", 3000);
         }
     }
 
@@ -499,6 +504,8 @@ function checkCrownCollision() {
             moveCrown();
             crown.visible = true;
             crownRespawnCounter = 0;
+
+            showNotification("👑 Crown power-up appeared!", 3000);
         }
     }
 }
@@ -511,13 +518,16 @@ function checkFoodCollision() {
         snake.growing = true;
         
         createHeartEffect(food.x, food.y);
-        if (score === 10) {showNotification("Tahirah is getting stronger! Cuzon is chasing now! 🤢", 120);
+        if (score === 10) {
+    showNotification("❤️ Tahirah is getting stronger! Cuzon is chasing now! 🤢", 3500);
+
     cuzonChaseMode = true;
     cuzonChaseDelay = 1;
 
     moveCrown();
     crown.visible = true;
-    cuzon.active = true;
+
+    showNotification("👑 Crown power-up appeared!", 3000);
 }
         if (score >= winningScore) {
     gameWon = true;
@@ -684,7 +694,6 @@ function draw() {
     drawHeartEffects();
     drawCuzon();
     drawScore();
-    drawLoveMessage();
 }
 
 setInterval(draw, 150);
