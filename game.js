@@ -58,6 +58,9 @@ let gameWon = false;
 const winningScore = 25;
 const topHudHeight = 80;
 const bottomHudHeight = 0;
+let cuzonChaseMode = false;
+let cuzonMoveCounter = 0;
+const cuzonChaseDelay = 4;
 
 let touchStartX = 0;
 let touchStartY = 0;
@@ -142,16 +145,39 @@ function moveCuzon() {
         return;
     }
 
-    let newX;
-    let newY;
+    if (!cuzonChaseMode) {
+        let newX;
+        let newY;
 
-    do {
-        newX = randomGridPosition(cuzon.size, "x");
-        newY = randomGridPosition(cuzon.size, "y");
-    } while (isOnSnake(newX, newY) || (newX === food.x && newY === food.y));
+        do {
+            newX = randomGridPosition(cuzon.size, "x");
+            newY = randomGridPosition(cuzon.size, "y");
+        } while (isOnSnake(newX, newY) || (newX === food.x && newY === food.y));
 
-    cuzon.x = newX;
-    cuzon.y = newY;
+        cuzon.x = newX;
+        cuzon.y = newY;
+        return;
+    }
+
+    cuzonMoveCounter++;
+
+    if (cuzonMoveCounter < cuzonChaseDelay) {
+        return;
+    }
+
+    cuzonMoveCounter = 0;
+
+    const head = snake.body[0];
+
+    if (cuzon.x < head.x) {
+        cuzon.x += cuzon.size;
+    } else if (cuzon.x > head.x) {
+        cuzon.x -= cuzon.size;
+    } else if (cuzon.y < head.y) {
+        cuzon.y += cuzon.size;
+    } else if (cuzon.y > head.y) {
+        cuzon.y -= cuzon.size;
+    }
 }
 
 document.addEventListener("keydown", function(event) {
@@ -279,6 +305,22 @@ function drawScore() {
     ctx.fillText("Best: " + highScore, 20, 65);
 }
 
+function drawLoveMessage() {
+    if (score >= 10) {
+        ctx.textAlign = "center";
+
+        ctx.fillStyle = "pink";
+        ctx.font = "24px Arial";
+        ctx.fillText(
+            "Tahirah is getting stronger! Cuzon is chasing now! 🤢",
+            canvas.width / 2,
+            canvas.height - 22
+        );
+
+        ctx.textAlign = "start";
+    }
+}
+
 function drawStartScreen() {
     if (introBackground.complete) {
         ctx.drawImage(introBackground, 0, 0, canvas.width, canvas.height);
@@ -334,15 +376,16 @@ function checkFoodCollision() {
     if (head.x === food.x && head.y === food.y) {
         score++;
         snake.growing = true;
+        if (score >= 10) {
+    cuzonChaseMode = true;
+}
 
         if (score >= winningScore) {
-            gameWon = true;
-            stopMusic();
-            updateHighScore();
-            return;
-            
-            return;
-        }
+    gameWon = true;
+    stopMusic();
+    updateHighScore();
+    return;
+}
 
         moveFood();
     }
