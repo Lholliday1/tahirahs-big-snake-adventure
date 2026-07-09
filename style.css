@@ -75,7 +75,7 @@ canvas {
 }
 
 #bottomBar {
-    width: min(94vw, 700px);
+    width: min(92vw, 600px);
 
     display: flex;
     flex-direction: column;
@@ -84,6 +84,14 @@ canvas {
     gap: 10px;
 
     margin-top: 18px;
+}
+
+.buttonRow {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 #notificationBar {
@@ -125,4 +133,8 @@ canvas {
     box-shadow:
         0 0 10px deepskyblue,
         0 0 20px dodgerblue;
+}
+
+#bottomBar button {
+    min-width: 140px;
 }

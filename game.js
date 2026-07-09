@@ -464,6 +464,7 @@ function drawCrown() {
 }
 
 function drawScore() {
+    ctx.textAlign = "center";
     ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
     ctx.fillRect(0, 0, canvas.width, topHudHeight);
 
@@ -757,22 +758,6 @@ function drawGameOver() {
     ctx.font = "26px Arial";
     ctx.fillText("Press R to Restart", canvas.width / 2, 415);
 
-    if (Math.random() < 0.35) {
-    createWinHeart();
-}
-
-for (let i = winHearts.length - 1; i >= 0; i--) {
-    const heart = winHearts[i];
-
-    ctx.font = heart.size + "px Arial";
-    ctx.fillText("❤️", heart.x, heart.y);
-
-    heart.y += heart.speed;
-
-    if (heart.y > canvas.height + 30) {
-        winHearts.splice(i, 1);
-    }
-}
 if (Math.random() < 0.35) {
     createBrokenHeart();
 }
