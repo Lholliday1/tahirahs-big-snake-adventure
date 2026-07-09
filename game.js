@@ -310,6 +310,12 @@ function moveCuzon() {
 }
 
 document.addEventListener("keydown", function(event) {
+    const gameKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "];
+
+    if (gameKeys.includes(event.key)) {
+        event.preventDefault();
+    }
+
     if (event.key.toLowerCase() === "p" && gameStarted && !gameOver && !gameWon) {
         gamePaused = !gamePaused;
 
