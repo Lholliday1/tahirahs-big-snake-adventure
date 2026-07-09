@@ -167,6 +167,11 @@ document.addEventListener("keydown", function(event) {
 });
 
 canvas.addEventListener("click", function() {
+    if (gameOver) {
+        location.reload();
+        return;
+    }
+
     startGame();
 });
 
