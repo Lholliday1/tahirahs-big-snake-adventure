@@ -191,6 +191,11 @@ canvas.addEventListener("touchmove", function(event) {
 canvas.addEventListener("touchend", function(event) {
     event.preventDefault();
 
+    if (gameOver) {
+        location.reload();
+        return;
+    }
+
     const touchEndX = event.changedTouches[0].clientX;
     const touchEndY = event.changedTouches[0].clientY;
 
