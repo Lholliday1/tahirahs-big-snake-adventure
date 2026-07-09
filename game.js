@@ -1,3 +1,5 @@
+
+
 const gameBackground = new Image();
 gameBackground.src = "assets/images/game-background.jpeg";
 
@@ -9,6 +11,19 @@ eddieLaugh.volume = 1.0;
 
 const bgMusic = document.getElementById("bgMusic");
 bgMusic.volume = 0.35;
+const muteButton = document.getElementById("muteButton");
+let muted = false;
+
+muteButton.addEventListener("click", function() {
+    muted = !muted;
+
+    bgMusic.muted = muted;
+    eddieLaugh.muted = muted;
+
+    muteButton.textContent = muted
+        ? "🔇 Sound Off"
+        : "🔊 Sound On";
+});
 
 const introBackground = new Image();
 introBackground.src = "assets/images/intro-background.jpeg";
@@ -64,6 +79,7 @@ let cuzonChaseDelay = 4;
 
 let touchStartX = 0;
 let touchStartY = 0;
+let heartEffects = [];
 
 function randomGridPosition(size, axis) {
     if (axis === "x") {
@@ -396,12 +412,22 @@ function updateHighScore() {
         localStorage.setItem("tahirahHighScore", highScore);
     }
 }
+
+function createHeartEffect(x, y) {
+    heartEffects.push({
+        x: x,
+        y: y,
+        text: "+1 ❤️",
+        life: 30
+    });
+}
 function checkFoodCollision() {
     const head = snake.body[0];
 
     if (head.x === food.x && head.y === food.y) {
         score++;
         snake.growing = true;
+        createHeartEffect(food.x, food.y);
         if (score >= 10) {
     cuzonChaseMode = true;
     cuzonChaseDelay = 1;
@@ -512,6 +538,26 @@ ctx.fillText("❤️", canvas.width / 2, 225);
 
     ctx.textAlign = "start";
 }
+
+function drawHeartEffects() {
+    for (let i = heartEffects.length - 1; i >= 0; i--) {
+        const effect = heartEffects[i];
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "pink";
+        ctx.font = "22px Arial";
+        ctx.fillText(effect.text, effect.x + 10, effect.y);
+
+        effect.y -= 1;
+        effect.life--;
+
+        if (effect.life <= 0) {
+            heartEffects.splice(i, 1);
+        }
+    }
+
+    ctx.textAlign = "start";
+}
 function draw() {
     if (!gameStarted) {
         drawStartScreen();
@@ -546,6 +592,7 @@ function draw() {
 
     drawSnake();
     drawFood();
+    drawHeartEffects();
     drawCuzon();
     drawScore();
     drawLoveMessage();
