@@ -13,7 +13,7 @@ princeDidThat.volume = 0.25;
 const winSound = new Audio("assets/sounds/aww-so-cute.m4a");
 winSound.volume = 0.45;
 const heartPop = new Audio("assets/sounds/heart-pop.mp3");
-heartPop.volume = 0.02;
+heartPop.volume = 0.01;
 
 const bgMusic = document.getElementById("bgMusic");
 bgMusic.volume = 0.35;
