@@ -50,6 +50,7 @@ const cuzon = {
 };
 
 let score = 0;
+let highScore = localStorage.getItem("tahirahHighScore") || 0;
 let gameStarted = false;
 let gameOver = false;
 let gameOverReason = "";
@@ -253,8 +254,9 @@ function drawCuzon() {
 
 function drawScore() {
     ctx.fillStyle = "white";
-    ctx.font = "24px Arial";
+    ctx.font = "22px Arial";
     ctx.fillText("Hearts: " + score, 20, 35);
+    ctx.fillText("Best: " + highScore, 20, 65);
 }
 
 function drawLoveMessage() {
@@ -300,6 +302,12 @@ function drawStartScreen() {
     ctx.textAlign = "start";
 }
 
+function updateHighScore() {
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("tahirahHighScore", highScore);
+    }
+}
 function checkFoodCollision() {
     const head = snake.body[0];
 
@@ -310,6 +318,10 @@ function checkFoodCollision() {
         if (score >= winningScore) {
             gameWon = true;
             stopMusic();
+            if (score > highScore) {
+    highScore = score;
+    localStorage.setItem("tahirahHighScore", highScore);
+}
             return;
         }
 
@@ -329,6 +341,11 @@ function checkWallCollision() {
         gameOver = true;
         gameOverReason = "Tahirah ran out of room! 😭";
         stopMusic();
+updateHighScore();
+        if (score > highScore) {
+    highScore = score;
+    localStorage.setItem("tahirahHighScore", highScore);
+}
 
 eddieLaugh.currentTime = 0;
 eddieLaugh.play();
@@ -342,6 +359,7 @@ function checkCuzonCollision() {
         gameOver = true;
         gameOverReason = "Cuzon got too close and got SICK! 🤢";
         stopMusic();
+updateHighScore();
 
 eddieLaugh.currentTime = 0;
 eddieLaugh.play();
