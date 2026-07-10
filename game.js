@@ -1571,11 +1571,13 @@ function moveCrown() {
 function checkCrownCollision() {
     const head = snake.body[0];
 
-    if (
-    crown.visible &&
-    head.x === crown.x &&
-    head.y === crown.y
-) {
+    const touchedCrown =
+        head.x < crown.x + crown.size &&
+        head.x + snake.size > crown.x &&
+        head.y < crown.y + crown.size &&
+        head.y + snake.size > crown.y;
+
+    if (crown.visible && touchedCrown) {
         crown.visible = false;
         crown.active = true;
         crown.timer = 50;
@@ -1585,14 +1587,20 @@ function checkCrownCollision() {
         princeDidThat.currentTime = 0;
         princeDidThat.play();
 
-        showNotification("👑 Prince Did That! Cuzon is frozen!", 3500);
+        showNotification(
+            "👑 Prince Did That! Cuzon is frozen!",
+            3500
+        );
     }
 
     if (crown.active) {
         crown.timer--;
 
         if (crown.timer === 15) {
-            showNotification("⚠️ Crown power ending!", 1500);
+            showNotification(
+                "⚠️ Crown power ending!",
+                1500
+            );
         }
 
         if (crown.timer <= 0) {
@@ -1601,11 +1609,20 @@ function checkCrownCollision() {
 
             cuzon.emoji = "🤢";
 
-            showNotification("⚠️ Cuzon is moving again!", 3000);
+            showNotification(
+                "⚠️ Cuzon is moving again!",
+                3000
+            );
         }
     }
 
-    if (!crown.visible && !crown.active && cuzonChaseMode && !gameOver && !gameWon) {
+    if (
+        !crown.visible &&
+        !crown.active &&
+        cuzonChaseMode &&
+        !gameOver &&
+        !gameWon
+    ) {
         crownRespawnCounter++;
 
         if (crownRespawnCounter >= crownRespawnDelay) {
@@ -1613,7 +1630,10 @@ function checkCrownCollision() {
             crown.visible = true;
             crownRespawnCounter = 0;
 
-            showNotification("👑 Crown power-up appeared!", 3000);
+            showNotification(
+                "👑 Crown power-up appeared!",
+                3000
+            );
         }
     }
 }
