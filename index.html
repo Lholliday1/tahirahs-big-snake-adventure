@@ -9,7 +9,63 @@
 <body>
 
     <div id="gameContainer">
-        <h1>Tahirah's Big Snake Adventure 🐍</h1>
+        <div id="mainMenu">
+
+    <div id="menuHearts" aria-hidden="true"></div>
+
+    <img
+        id="menuCover"
+        src="assets/images/menu-cover.png"
+        alt="Tahirah's Big Snake Adventure Cover">
+
+    <h2>Love Across the Map ❤️</h2>
+
+    <p>
+        Travel through Meridian, Howell, and New Orleans
+        while collecting hearts and avoiding Cuzon.
+    </p>
+
+    <button id="startAdventureButton">
+        Start Adventure
+    </button>
+
+</div>
+
+<div id="worldMap">
+
+    <h2>Love Across the Map ❤️</h2>
+
+    <p id="mapMessage">
+        Choose your destination
+    </p>
+
+    <div class="mapLocations">
+
+        <button class="mapLocation unlocked" id="meridianButton">
+            <span class="locationIcon">📍</span>
+            <span class="locationName">Meridian, Mississippi</span>
+            <span class="locationStatus">Level 1</span>
+        </button>
+
+        <button class="mapLocation locked" id="howellButton" disabled>
+            <span class="locationIcon">🔒</span>
+            <span class="locationName">Howell, New Jersey</span>
+            <span class="locationStatus">Locked</span>
+        </button>
+
+        <button class="mapLocation locked" id="newOrleansButton" disabled>
+            <span class="locationIcon">🔒</span>
+            <span class="locationName">New Orleans, Louisiana</span>
+            <span class="locationStatus">Locked</span>
+        </button>
+
+        </div>
+
+    <button id="resetProgressButton">
+        Reset Progress
+    </button>
+
+</div>
 
         <canvas id="gameCanvas" width="600" height="600"></canvas>
         <div id="bottomBar">
@@ -29,14 +85,15 @@
 </div>
 
     <div class="buttonRow">
-        <button id="muteButton">🔊 Sound On</button>
-        <button id="pauseButton">⏸️ Pause</button>
-    </div>
+    <button id="muteButton">🔊 Sound On</button>
+    <button id="pauseButton">⏸️ Pause</button>
+    <button id="mainMenuButton">🏠 Main Menu</button>
+</div>
 
 </div>
 
         <audio id="bgMusic" loop>
-            <source src="assets/music/gameplay-theme.mp3" type="audio/mpeg">
+            <source src="assets/music/main-menu-theme.mp3" type="audio/mpeg">
         </audio>
     </div>
 

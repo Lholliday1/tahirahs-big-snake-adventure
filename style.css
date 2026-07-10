@@ -157,6 +157,7 @@ canvas {
 
 #dpad button {
     width: 58px;
+    min-width: 0;
     height: 58px;
 
     border: 2px solid hotpink;
@@ -177,4 +178,303 @@ canvas {
 
 #dpad button:active {
     transform: scale(0.92);
+}
+
+#gameCanvas,
+#bottomBar {
+    display: none;
+}
+
+#mainMenu {
+    position: relative;
+
+    text-align: center;
+    color: white;
+    max-width: 600px;
+    padding: 24px;
+
+    overflow: hidden;
+}
+
+#menuHearts {
+    position: absolute;
+    inset: 0;
+
+    overflow: hidden;
+    pointer-events: none;
+
+    z-index: 0;
+}
+
+#mainMenu > *:not(#menuHearts) {
+    position: relative;
+    z-index: 1;
+}
+
+#menuCover {
+    width: 100%;
+    max-width: 650px;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 0 25px rgba(255,105,180,.45);
+
+    margin-bottom: 24px;
+
+    display: block;
+}
+
+#mainMenu h2 {
+    font-size: clamp(28px, 6vw, 48px);
+    margin-bottom: 14px;
+}
+
+#mainMenu p {
+    font-size: 18px;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+
+#startAdventureButton {
+    margin-top: 20px;
+    padding: 14px 28px;
+
+    border: 2px solid hotpink;
+    border-radius: 999px;
+
+    background: linear-gradient(
+        135deg,
+        #ff4fa3,
+        #ff85d8
+    );
+
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 0 15px hotpink,
+        0 0 35px deeppink;
+
+    transition:
+        transform .2s,
+        box-shadow .2s;
+
+    animation: pulseButton 2s infinite;
+}
+
+#startAdventureButton:hover {
+    transform: scale(1.05);
+
+    box-shadow:
+        0 0 20px hotpink,
+        0 0 45px deeppink;
+}
+
+#startAdventureButton:active {
+    transform: scale(.97);
+}
+
+@keyframes pulseButton {
+
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+        box-shadow:
+            0 0 25px hotpink,
+            0 0 55px deeppink;
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.menuHeart {
+    position: absolute;
+    bottom: -40px;
+
+    display: block;
+
+    opacity: 0;
+    filter: drop-shadow(0 0 8px hotpink);
+
+    animation-name: floatMenuHeart;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+@keyframes floatMenuHeart {
+    0% {
+        transform: translateY(0) rotate(0deg) scale(0.8);
+        opacity: 0;
+    }
+
+    15% {
+        opacity: 0.8;
+    }
+
+    85% {
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translateY(-700px) rotate(25deg) scale(1.15);
+        opacity: 0;
+    }
+}
+
+/* ---------------- World Map ---------------- */
+
+#worldMap {
+    display: none;
+
+    width: min(92vw, 600px);
+    padding: 24px;
+
+    text-align: center;
+    color: white;
+
+    border: 2px solid hotpink;
+    border-radius: 20px;
+
+    background: rgba(0, 0, 0, 0.75);
+
+    box-shadow:
+        0 0 20px hotpink,
+        0 0 40px deeppink;
+}
+
+#worldMap h2 {
+    font-size: clamp(28px, 6vw, 44px);
+    margin-bottom: 10px;
+}
+
+#mapMessage {
+    margin-bottom: 20px;
+    font-size: 18px;
+    opacity: 0.9;
+}
+
+.mapLocations {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.mapLocation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+
+    width: 100%;
+    padding: 16px;
+
+    border-radius: 16px;
+    border: 2px solid hotpink;
+
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+
+    cursor: pointer;
+}
+
+.mapLocation.unlocked {
+    box-shadow:
+        0 0 12px hotpink,
+        0 0 24px deeppink;
+}
+
+.mapLocation.locked {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.locationIcon {
+    font-size: 30px;
+}
+
+.locationName {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.locationStatus {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+#resetProgressButton {
+    margin-top: 22px;
+    padding: 10px 18px;
+
+    border: 2px solid #ff5c5c;
+    border-radius: 999px;
+
+    background: rgba(80, 0, 0, 0.55);
+    color: white;
+
+    font-size: 15px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 0 10px rgba(255, 92, 92, 0.7);
+
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+}
+
+#resetProgressButton:hover {
+    transform: scale(1.04);
+
+    box-shadow:
+        0 0 16px rgba(255, 92, 92, 0.95);
+}
+
+#resetProgressButton:active {
+    transform: scale(0.97);
+}
+
+#mainMenuButton {
+    margin-top: 0;
+    padding: 10px 18px;
+
+    background: rgba(0, 0, 0, 0.55);
+    color: white;
+
+    border: 2px solid #7cff8a;
+    border-radius: 999px;
+
+    font-size: 16px;
+    cursor: pointer;
+
+    box-shadow:
+        0 0 10px #7cff8a,
+        0 0 20px #22aa55;
+
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+}
+
+#mainMenuButton:hover {
+    transform: scale(1.04);
+
+    box-shadow:
+        0 0 15px #7cff8a,
+        0 0 28px #22aa55;
+}
+
+#mainMenuButton:active {
+    transform: scale(0.96);
 }

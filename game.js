@@ -21,14 +21,26 @@ bgMusic.volume = 0.35;
 
 const muteButton = document.getElementById("muteButton");
 const pauseButton = document.getElementById("pauseButton");
+const mainMenuButton =
+    document.getElementById("mainMenuButton");
 const upButton = document.getElementById("upButton");
 const downButton = document.getElementById("downButton");
 const leftButton = document.getElementById("leftButton");
 const rightButton = document.getElementById("rightButton");
 const notificationBar = document.getElementById("notificationBar");
 const tipBar = document.getElementById("tipBar");
+const mainMenu = document.getElementById("mainMenu");
+const startAdventureButton = document.getElementById("startAdventureButton");
+const menuHearts = document.getElementById("menuHearts");
+const worldMap = document.getElementById("worldMap");
+const meridianButton = document.getElementById("meridianButton");
+const howellButton = document.getElementById("howellButton");
+const newOrleansButton = document.getElementById("newOrleansButton");
+const resetProgressButton =
+    document.getElementById("resetProgressButton");
 
 let muted = false;
+let menuOpen = true;
 
 muteButton.addEventListener("click", function() {
     muted = !muted;
@@ -135,6 +147,7 @@ let highScore = localStorage.getItem("tahirahHighScore") || 0;
 let bonusScore = 0;
 let combo = 1;
 let comboTimer = 0;
+let bestCombo = 1;
 const comboTimeLimit = 35;
 
 let gameStarted = false;
@@ -144,13 +157,304 @@ let gameWon = false;
 let gamePaused = false;
 let winFade = false;
 let winFadeAlpha = 0;
+let levelComplete = false;
+let levelIntroActive = false;
+let levelIntroTimer = 0;
+let levelIntroAlpha = 1;
+let comingSoonActive = false;
+let comingSoonTimer = 0;
+let comingSoonAlpha = 0;
+let comingSoonPhase = "fadeIn";
 
-const winningScore = 25;
+let currentLevel = 1;
+const demoMode = true;
+
+let unlockedLevel =
+    Number(localStorage.getItem("tahirahUnlockedLevel")) || 1;
+
+const levelGoals = {
+    1: 25,
+    2: 25,
+    3: 25
+};
+
+const levels = {
+    1: {
+    name: "Meridian, Mississippi",
+    background: "assets/images/meridian-background.jpeg",
+    music: "assets/music/meridian-theme.mp3",
+
+    enemyType: "teleport",
+    projectileAttack: false,
+    chaseStartsAt: 10
+},
+
+    2: {
+    name: "Howell, New Jersey",
+    background: "assets/images/howell-background.jpeg",
+    music: "assets/music/howell-theme.mp3",
+
+    enemyType: "walker",
+    projectileAttack: true,
+    chaseStartsAt: 0
+},
+
+    3: {
+    name: "New Orleans, Louisiana",
+    background: "assets/images/new-orleans-background.jpeg",
+    music: "assets/music/new-orleans-theme.mp3",
+
+    enemyType: "boss",
+    projectileAttack: true,
+    chaseStartsAt: 0
+},
+};
+
+function loadLevel(levelNumber) {
+    currentLevel = levelNumber;
+
+    const level = levels[currentLevel];
+
+    gameBackground.src = level.background;
+    gameBackground.onerror = function() {
+    console.error(
+        "Could not load level background:",
+        level.background
+    );
+
+    showNotification(
+        "⚠️ Level background could not load",
+        4000
+    );
+};
+
+    switchMusic(level.music);
+
+    score = 0;
+    bonusScore = 0;
+    combo = 1;
+    comboTimer = 0;
+    bestCombo = 1;
+
+    snake.body = [{ x: 100, y: 100 }];
+    snake.directionX = 1;
+    snake.directionY = 0;
+    snake.growing = false;
+
+    food.x = 300;
+    food.y = 300;
+
+    cuzon.x = 420;
+    cuzon.y = 220;
+    cuzon.emoji = "🤢";
+
+    crown.visible = false;
+    crown.active = false;
+    crown.timer = 0;
+    crownRespawnCounter = 0;
+
+    cuzonChaseMode = false;
+    cuzonMoveCounter = 0;
+
+    cuzonState = "moving";
+cuzonStateTimer = 0;
+cuzonSpeech = "";
+
+projectiles = [];
+projectileCooldown = 18;
+slowTimer = 0;
+
+    gameOver = false;
+    gameWon = false;
+    gamePaused = false;
+    winFade = false;
+    winFadeAlpha = 0;
+    levelIntroActive = true;
+levelIntroTimer = 24;
+levelIntroAlpha = 1;
+
+    pauseButton.textContent = "⏸️ Pause";
+
+    showNotification(
+        "📍 Level " + currentLevel + ": " + level.name,
+        3000
+    );
+}
+
+function restartCurrentLevel() {
+    levelComplete = false;
+    gameOver = false;
+    gameWon = false;
+    gamePaused = false;
+
+    brokenHearts = [];
+    winHearts = [];
+    heartEffects = [];
+
+    loadLevel(currentLevel);
+
+    gameStarted = true;
+
+    showNotification(
+        "🔄 Restarting " + levels[currentLevel].name,
+        2000
+    );
+}
+
+function startComingSoonScreen() {
+    comingSoonActive = true;
+    comingSoonTimer = 90;
+    comingSoonAlpha = 0;
+    comingSoonPhase = "fadeIn";
+
+    gameStarted = true;
+    levelComplete = false;
+    winFade = false;
+
+    projectiles = [];
+    cuzonSpeech = "";
+
+    switchMusic(levels[2].music);
+}
+function advanceToNextLevel() {
+    if (demoMode && currentLevel === 1) {
+        startComingSoonScreen();
+        return;
+    }
+
+    if (currentLevel < 3) {
+        unlockedLevel = Math.max(
+            unlockedLevel,
+            currentLevel + 1
+        );
+
+        localStorage.setItem(
+            "tahirahUnlockedLevel",
+            unlockedLevel
+        );
+
+        showWorldMap();
+        return;
+    }
+
+    gameWon = true;
+}
+
+function showWorldMap() {
+    levelComplete = false;
+    gameStarted = false;
+
+    canvas.style.display = "none";
+    document.getElementById("bottomBar").style.display = "none";
+    worldMap.style.display = "block";
+
+    updateWorldMap();
+}
+
+function returnToMainMenu() {
+    gameStarted = false;
+    gamePaused = false;
+    gameOver = false;
+    gameWon = false;
+    levelComplete = false;
+    levelIntroActive = false;
+    winFade = false;
+
+    projectiles = [];
+    heartEffects = [];
+    brokenHearts = [];
+    winHearts = [];
+
+    cuzonSpeech = "";
+    cuzonState = "moving";
+    cuzonStateTimer = 0;
+
+    stopMusic();
+
+    canvas.style.display = "none";
+    document.getElementById("bottomBar").style.display = "none";
+    worldMap.style.display = "none";
+    mainMenu.style.display = "block";
+
+    menuOpen = true;
+
+    pauseButton.textContent = "⏸️ Pause";
+
+    startMenuMusic();
+}
+
+
+function updateWorldMap() {
+    const howellIcon = howellButton.querySelector(".locationIcon");
+    const howellStatus = howellButton.querySelector(".locationStatus");
+
+    const newOrleansIcon =
+        newOrleansButton.querySelector(".locationIcon");
+
+    const newOrleansStatus =
+        newOrleansButton.querySelector(".locationStatus");
+
+        if (demoMode) {
+    howellButton.disabled = true;
+    howellButton.classList.add("locked");
+    howellButton.classList.remove("unlocked");
+
+    howellIcon.textContent = "🚧";
+    howellStatus.textContent = "Coming Soon";
+
+    newOrleansButton.disabled = true;
+    newOrleansButton.classList.add("locked");
+    newOrleansButton.classList.remove("unlocked");
+
+    newOrleansIcon.textContent = "🚧";
+    newOrleansStatus.textContent = "Coming Soon";
+
+    return;
+}
+
+    if (unlockedLevel >= 2) {
+        howellButton.disabled = false;
+        howellButton.classList.remove("locked");
+        howellButton.classList.add("unlocked");
+
+        howellIcon.textContent = "📍";
+        howellStatus.textContent = "Level 2";
+    } else {
+        howellButton.disabled = true;
+        howellButton.classList.add("locked");
+        howellButton.classList.remove("unlocked");
+
+        howellIcon.textContent = "🔒";
+        howellStatus.textContent = "Locked";
+    }
+
+    if (unlockedLevel >= 3) {
+        newOrleansButton.disabled = false;
+        newOrleansButton.classList.remove("locked");
+        newOrleansButton.classList.add("unlocked");
+
+        newOrleansIcon.textContent = "📍";
+        newOrleansStatus.textContent = "Level 3";
+    } else {
+        newOrleansButton.disabled = true;
+        newOrleansButton.classList.add("locked");
+        newOrleansButton.classList.remove("unlocked");
+
+        newOrleansIcon.textContent = "🔒";
+        newOrleansStatus.textContent = "Locked";
+    }
+}
+
 const topHudHeight = 80;
 const bottomHudHeight = 0;
 
 let cuzonChaseMode = false;
 let cuzonMoveCounter = 0;
+let cuzonState = "moving";
+
+let cuzonStateTimer = 0;
+
+let cuzonSpeech = "";
 let cuzonChaseDelay = 4;
 
 let touchStartX = 0;
@@ -159,6 +463,12 @@ let touchStartY = 0;
 let heartEffects = [];
 let winHearts = [];
 let brokenHearts = [];
+let projectiles = [];
+
+let projectileCooldown = 0;
+
+const projectileCooldownTime = 28;
+let slowTimer = 0;
 
 let notificationText = "";
 let notificationTimer = 0;
@@ -222,9 +532,7 @@ function startGame() {
     if (!gameStarted && !gameOver && !gameWon) {
         gameStarted = true;
 
-        startMusic();
         startTips();
-
         tipBar.textContent = tips[0];
     }
 }
@@ -291,6 +599,11 @@ function moveCuzon() {
         return;
     }
 
+    if (levels[currentLevel].enemyType === "walker") {
+    moveHowellCuzon();
+    return;
+}
+
     if (!cuzonChaseMode) {
         cuzonMoveCounter++;
 
@@ -348,7 +661,39 @@ function moveCuzon() {
     }
 }
 
+function shootProjectile() {
+    const head = snake.body[0];
+
+    const angle = Math.atan2(
+        head.y - cuzon.y,
+        head.x - cuzon.x
+    );
+
+    projectiles.push({
+        x: cuzon.x,
+        y: cuzon.y,
+        speed: 14,
+        dx: Math.cos(angle),
+        dy: Math.sin(angle),
+        emoji: "🥦",
+        size: 20
+    });
+
+    cuzonSpeech = "";
+}
+
 document.addEventListener("keydown", function(event) {
+
+    if (menuOpen) {
+    return;
+}
+
+if (levelComplete && event.key === "Enter") {
+    levelComplete = false;
+    advanceToNextLevel();
+    return;
+}
+
     const gameKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "];
 
     if (gameKeys.includes(event.key)) {
@@ -370,7 +715,7 @@ document.addEventListener("keydown", function(event) {
     }
 
     if ((gameOver || gameWon) && event.key.toLowerCase() === "r") {
-        location.reload();
+        restartCurrentLevel();
         return;
     }
 
@@ -401,13 +746,155 @@ document.addEventListener("keydown", function(event) {
 });
 
 canvas.addEventListener("click", function() {
+    if (levelComplete) {
+    levelComplete = false;
+    advanceToNextLevel();
+    return;
+}
+
     if (gameOver || gameWon) {
-        location.reload();
+        restartCurrentLevel();
         return;
     }
 
     startGame();
 });
+
+function beginHowellAttack() {
+    const sayings = [
+        "Not today!",
+        "You ain't getting those hearts!",
+        "Catch this!",
+        "Try dodging THIS!",
+        "No free hearts!"
+    ];
+
+    cuzonSpeech =
+        sayings[Math.floor(Math.random() * sayings.length)];
+
+    cuzonState = "warning";
+    cuzonStateTimer = 8;
+}
+
+function moveHowellCuzon() {
+    if (cuzonState === "warning") {
+        cuzonStateTimer--;
+
+        if (cuzonStateTimer <= 0) {
+            shootProjectile();
+
+            cuzonState = "moving";
+            projectileCooldown = projectileCooldownTime;
+        }
+
+        return;
+    }
+
+    if (projectileCooldown > 0) {
+        projectileCooldown--;
+    }
+
+    if (projectileCooldown <= 0) {
+        beginHowellAttack();
+        return;
+    }
+
+    cuzonMoveCounter++;
+
+    if (cuzonMoveCounter < 3) {
+        return;
+    }
+
+    cuzonMoveCounter = 0;
+
+    const head = snake.body[0];
+
+    const distanceX = head.x - cuzon.x;
+    const distanceY = head.y - cuzon.y;
+
+    if (Math.abs(distanceX) > Math.abs(distanceY)) {
+        cuzon.x += distanceX > 0
+            ? cuzon.size
+            : -cuzon.size;
+    } else {
+        cuzon.y += distanceY > 0
+            ? cuzon.size
+            : -cuzon.size;
+    }
+
+    cuzon.x = Math.max(
+        0,
+        Math.min(cuzon.x, canvas.width - cuzon.size)
+    );
+
+    cuzon.y = Math.max(
+        topHudHeight,
+        Math.min(cuzon.y, canvas.height - cuzon.size)
+    );
+}
+
+function moveProjectiles() {
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+        const projectile = projectiles[i];
+
+        projectile.x += projectile.dx * projectile.speed;
+        projectile.y += projectile.dy * projectile.speed;
+
+        const outsideCanvas =
+            projectile.x < -40 ||
+            projectile.x > canvas.width + 40 ||
+            projectile.y < topHudHeight - 40 ||
+            projectile.y > canvas.height + 40;
+
+        if (outsideCanvas) {
+            projectiles.splice(i, 1);
+        }
+    }
+}
+
+function drawProjectiles() {
+    ctx.save();
+    ctx.font = "24px Arial";
+
+    projectiles.forEach(function(projectile) {
+        ctx.fillText(
+            projectile.emoji,
+            projectile.x,
+            projectile.y + projectile.size
+        );
+    });
+
+    ctx.restore();
+}
+
+function checkProjectileCollision() {
+    const head = snake.body[0];
+
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+        const projectile = projectiles[i];
+
+        const hit =
+            head.x < projectile.x + projectile.size &&
+            head.x + snake.size > projectile.x &&
+            head.y < projectile.y + projectile.size &&
+            head.y + snake.size > projectile.y;
+
+        if (!hit) {
+            continue;
+        }
+
+        projectiles.splice(i, 1);
+
+        slowTimer = 20;
+        combo = 1;
+        comboTimer = 0;
+
+        showNotification(
+            "🥦 Broccoli hit! Tahirah is slowed!",
+            2500
+        );
+    }
+}
 
 canvas.addEventListener("touchstart", function(event) {
     event.preventDefault();
@@ -426,7 +913,7 @@ canvas.addEventListener("touchend", function(event) {
     event.preventDefault();
 
     if (gameOver || gameWon) {
-        location.reload();
+        restartCurrentLevel();
         return;
     }
 
@@ -459,9 +946,180 @@ canvas.addEventListener("touchend", function(event) {
     }
 }, { passive: false });
 
+startAdventureButton.addEventListener("click", function() {
+    mainMenu.style.display = "none";
+    worldMap.style.display = "block";
+
+    updateWorldMap();
+});
+
+meridianButton.addEventListener("click", function() {
+    menuOpen = false;
+
+    worldMap.style.display = "none";
+    canvas.style.display = "block";
+    document.getElementById("bottomBar").style.display = "flex";
+
+    loadLevel(1);
+    startGame();
+});
+
+howellButton.addEventListener("click", function() {
+    if (demoMode) {
+        return;
+    }
+
+    if (unlockedLevel < 2) {
+        return;
+    }
+
+    menuOpen = false;
+
+    worldMap.style.display = "none";
+    canvas.style.display = "block";
+    document.getElementById("bottomBar").style.display = "flex";
+
+    loadLevel(2);
+    startGame();
+});
+
+newOrleansButton.addEventListener("click", function() {
+    if (demoMode) {
+        return;
+    }
+
+    if (unlockedLevel < 3) {
+        return;
+    }
+
+    menuOpen = false;
+
+    worldMap.style.display = "none";
+    canvas.style.display = "block";
+    document.getElementById("bottomBar").style.display = "flex";
+
+    loadLevel(3);
+    startGame();
+});
+
+mainMenuButton.addEventListener("click", function() {
+    const confirmed = confirm(
+        "Return to the main menu? Your current level progress will restart."
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    returnToMainMenu();
+});
+
+resetProgressButton.addEventListener("click", function() {
+    const confirmed = confirm(
+        "Reset all progress, unlocked levels, and the high score?"
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    unlockedLevel = 1;
+    highScore = 0;
+
+    localStorage.removeItem("tahirahUnlockedLevel");
+    localStorage.removeItem("tahirahHighScore");
+
+    updateWorldMap();
+
+    alert(
+        "All progress has been reset. Only Meridian is unlocked."
+    );
+});
+
+function startMenuMusic() {
+    if (!menuOpen) {
+        return;
+    }
+
+    bgMusic.src = "assets/music/main-menu-theme.mp3";
+    bgMusic.loop = true;
+    bgMusic.volume = 0.35;
+
+    bgMusic.play().catch(function(error) {
+        console.log("Menu music could not start:", error);
+    });
+}
+
+function switchMusic(newTrack) {
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+
+    bgMusic.src = newTrack;
+    bgMusic.load();
+    bgMusic.volume = 0.35;
+
+    bgMusic.play().catch(function(error) {
+        console.log("Music could not switch:", error);
+    });
+}
+
+function createMenuHeart() {
+    if (!menuOpen) {
+        return;
+    }
+
+    const heart = document.createElement("span");
+
+    heart.textContent = "❤️";
+    heart.className = "menuHeart";
+
+    heart.style.left = Math.random() * 100 + "%";
+    heart.style.fontSize = 14 + Math.random() * 18 + "px";
+    heart.style.animationDuration = 5 + Math.random() * 4 + "s";
+
+    menuHearts.appendChild(heart);
+
+    heart.addEventListener("animationend", function() {
+        heart.remove();
+    });
+}
+setInterval(function() {
+    if (menuOpen) {
+        createMenuHeart();
+    }
+}, 700);
+
+mainMenu.addEventListener("pointerdown", function() {
+    if (bgMusic.paused) {
+        startMenuMusic();
+    }
+}, { once: true });
+
 function stopMusic() {
     bgMusic.pause();
     bgMusic.currentTime = 0;
+}
+
+function fadeOutMusic(duration = 2500) {
+    const startingVolume = bgMusic.volume;
+    const fadeSteps = 25;
+    const stepTime = duration / fadeSteps;
+    const volumeStep = startingVolume / fadeSteps;
+
+    const fadeInterval = setInterval(function() {
+        bgMusic.volume = Math.max(
+            0,
+            bgMusic.volume - volumeStep
+        );
+
+        if (bgMusic.volume <= 0) {
+            clearInterval(fadeInterval);
+
+            bgMusic.pause();
+            bgMusic.currentTime = 0;
+            bgMusic.volume = 0.35;
+        }
+    }, stepTime);
 }
 
 function drawSnake() {
@@ -501,7 +1159,73 @@ function drawFood() {
 
 function drawCuzon() {
     ctx.font = "24px Arial";
-    ctx.fillText(cuzon.emoji, cuzon.x, cuzon.y + 20);
+    ctx.fillText(
+        cuzon.emoji,
+        cuzon.x,
+        cuzon.y + 20
+    );
+
+    if (!cuzonSpeech) {
+        return;
+    }
+
+    ctx.save();
+
+    const bubbleWidth = 220;
+    const bubbleHeight = 52;
+
+    const head = snake.body[0];
+
+let bubbleX = cuzon.x - bubbleWidth / 2;
+let bubbleY = cuzon.y - 68;
+
+const snakeNearBubble =
+    head.x < bubbleX + bubbleWidth + 30 &&
+    head.x + snake.size > bubbleX - 30 &&
+    head.y < bubbleY + bubbleHeight + 30 &&
+    head.y + snake.size > bubbleY - 30;
+
+if (snakeNearBubble) {
+    bubbleY = cuzon.y + 38;
+}
+
+bubbleX = Math.max(
+    10,
+    Math.min(bubbleX, canvas.width - bubbleWidth - 10)
+);
+
+bubbleY = Math.max(
+    topHudHeight + 10,
+    Math.min(bubbleY, canvas.height - bubbleHeight - 10)
+);
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+    ctx.roundRect(
+        bubbleX,
+        bubbleY,
+        bubbleWidth,
+        bubbleHeight,
+        12
+    );
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "black";
+    ctx.font = "bold 15px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    ctx.fillText(
+        cuzonSpeech,
+        bubbleX + bubbleWidth / 2,
+        bubbleY + bubbleHeight / 2
+    );
+
+    ctx.restore();
 }
 
 function drawCrown() {
@@ -546,6 +1270,24 @@ function drawScore() {
     ctx.fillText("Hearts: " + score, 24, 10);
     ctx.fillText("Best: " + highScore, 24, 36);
     ctx.fillText("Combo: x" + combo, 24, 62);
+    ctx.textAlign = "right";
+ctx.fillStyle = "hotpink";
+ctx.font = "bold 18px Arial";
+
+ctx.fillText(
+    "Level " + currentLevel,
+    canvas.width - 24,
+    16
+);
+
+ctx.fillStyle = "white";
+ctx.font = "16px Arial";
+
+ctx.fillText(
+    levels[currentLevel].name,
+    canvas.width - 24,
+    44
+);
 
     ctx.restore();
 }
@@ -724,6 +1466,10 @@ function checkFoodCollision() {
 
 comboTimer = comboTimeLimit;
 bonusScore += combo;
+
+if (combo > bestCombo) {
+    bestCombo = combo;
+}
 if (combo >= 2) {
     showNotification("🔥 Combo x" + combo + "!", 1200);
 }
@@ -733,7 +1479,10 @@ if (combo >= 2) {
 
         createHeartEffect(food.x, food.y);
 
-        if (score === 10) {
+        if (
+    currentLevel === 1 &&
+    score === levels[currentLevel].chaseStartsAt
+) {
             cuzonChaseMode = true;
             cuzonChaseDelay = 1;
 
@@ -743,7 +1492,8 @@ if (combo >= 2) {
             showNotification("❤️ Tahirah is getting stronger! Cuzon is chasing now! 👑", 3500);
         }
 
-        if (score >= winningScore) {
+        if (score >= levelGoals[currentLevel]) {
+
     winFade = true;
     winFadeAlpha = 0;
 
@@ -827,7 +1577,11 @@ function drawGameOver() {
     ctx.fillText("Final Hearts: " + score, canvas.width / 2, 345);
 
     ctx.font = "26px Arial";
-    ctx.fillText("Press R to Restart", canvas.width / 2, 415);
+    ctx.fillText(
+    "Press R or Tap to Retry Level " + currentLevel,
+    canvas.width / 2,
+    415
+);
 
     if (Math.random() < 0.35) {
         createBrokenHeart();
@@ -844,6 +1598,229 @@ function drawGameOver() {
         if (heart.y > canvas.height + 30) {
             brokenHearts.splice(i, 1);
         }
+    }
+
+    ctx.textAlign = "start";
+}
+
+function drawLevelIntro() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+
+    ctx.globalAlpha = levelIntroAlpha;
+    ctx.textAlign = "center";
+
+    ctx.fillStyle = "white";
+    ctx.font = "bold 34px monospace";
+    ctx.fillText(
+        "LEVEL " + currentLevel,
+        canvas.width / 2,
+        190
+    );
+
+    ctx.fillStyle = "hotpink";
+    ctx.font = "bold 28px monospace";
+    ctx.fillText(
+        levels[currentLevel].name.toUpperCase(),
+        canvas.width / 2,
+        250
+    );
+
+    ctx.fillStyle = "white";
+    ctx.font = "bold 24px monospace";
+    ctx.fillText(
+        "READY?",
+        canvas.width / 2,
+        340
+    );
+
+    ctx.fillStyle = "gold";
+    ctx.font = "bold 42px monospace";
+    ctx.fillText(
+        "START!",
+        canvas.width / 2,
+        410
+    );
+
+    ctx.restore();
+
+    if (levelIntroTimer > 0) {
+        levelIntroTimer--;
+        return;
+    }
+
+    levelIntroAlpha -= 0.08;
+
+    if (levelIntroAlpha <= 0) {
+        levelIntroAlpha = 0;
+        levelIntroActive = false;
+    }
+}
+
+function drawComingSoonScreen() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    ctx.save();
+
+    ctx.globalAlpha = comingSoonAlpha;
+    ctx.textAlign = "center";
+
+    ctx.fillStyle = "hotpink";
+    ctx.font = "bold 26px monospace";
+    ctx.fillText(
+        "NEXT STOP",
+        canvas.width / 2,
+        170
+    );
+
+    ctx.fillStyle = "white";
+    ctx.font = "bold 34px monospace";
+    ctx.fillText(
+        "HOWELL, NEW JERSEY",
+        canvas.width / 2,
+        240
+    );
+
+    ctx.fillStyle = "gold";
+    ctx.font = "bold 46px monospace";
+    ctx.fillText(
+        "COMING SOON",
+        canvas.width / 2,
+        335
+    );
+
+    ctx.fillStyle = "white";
+    ctx.font = "21px Arial";
+    ctx.fillText(
+        "The adventure continues...",
+        canvas.width / 2,
+        395
+    );
+
+    ctx.font = "34px Arial";
+    ctx.fillText(
+        "❤️ 🗺️ ❤️",
+        canvas.width / 2,
+        460
+    );
+
+    ctx.fillStyle = "#bbbbbb";
+ctx.font = "16px Arial";
+ctx.fillText(
+    "Version 0.1 Demo",
+    canvas.width / 2,
+    canvas.height - 28
+);
+
+    ctx.restore();
+
+    if (comingSoonPhase === "fadeIn") {
+        comingSoonAlpha += 0.07;
+
+        if (comingSoonAlpha >= 1) {
+            comingSoonAlpha = 1;
+            comingSoonPhase = "hold";
+        }
+
+        return;
+    }
+
+    if (comingSoonPhase === "hold") {
+    comingSoonTimer--;
+
+    if (comingSoonTimer === 20) {
+        fadeOutMusic(3000);
+    }
+
+    if (comingSoonTimer <= 0) {
+        comingSoonPhase = "fadeOut";
+    }
+
+    return;
+}
+
+    if (comingSoonPhase === "fadeOut") {
+        comingSoonAlpha -= 0.06;
+
+        if (comingSoonAlpha <= 0) {
+            comingSoonAlpha = 0;
+            comingSoonActive = false;
+
+            returnToMainMenu();
+        }
+    }
+}
+
+function drawLevelComplete() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.textAlign = "center";
+
+    ctx.fillStyle = "hotpink";
+    ctx.font = "bold 46px Arial";
+    ctx.fillText(
+        "❤️ LEVEL COMPLETE ❤️",
+        canvas.width / 2,
+        150
+    );
+
+    ctx.fillStyle = "white";
+    ctx.font = "28px Arial";
+    ctx.fillText(
+        levels[currentLevel].name,
+        canvas.width / 2,
+        220
+    );
+
+    ctx.font = "24px Arial";
+    ctx.fillText(
+        "Hearts Collected: " + score,
+        canvas.width / 2,
+        280
+    );
+
+    ctx.fillText(
+    "Best Combo: x" + bestCombo,
+    canvas.width / 2,
+    330
+);
+
+    if (currentLevel < 3) {
+        ctx.fillText(
+            "Next Stop:",
+            canvas.width / 2,
+            410
+        );
+
+        ctx.font = "bold 28px Arial";
+        ctx.fillText(
+            levels[currentLevel + 1].name,
+            canvas.width / 2,
+            455
+        );
+
+        ctx.font = "22px Arial";
+        ctx.fillText(
+            "Press ENTER or Tap to Continue",
+            canvas.width / 2,
+            525
+        );
+    } else {
+        ctx.font = "22px Arial";
+        ctx.fillText(
+            "Final Boss Ahead!",
+            canvas.width / 2,
+            450
+        );
     }
 
     ctx.textAlign = "start";
@@ -915,33 +1892,66 @@ function draw() {
         return;
     }
 
-    if (winFade) {
-    if (gameBackground.complete) {
-        ctx.drawImage(gameBackground, 0, 0, canvas.width, canvas.height);
-    } else {
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
-    drawSnake();
-    drawFood();
-    drawCrown();
-    drawHeartEffects();
-    drawCuzon();
-    drawScore();
-
-    winFadeAlpha += 0.08;
-
-    ctx.fillStyle = "rgba(0, 0, 0, " + winFadeAlpha + ")";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    if (winFadeAlpha >= 1) {
-        winFade = false;
-        gameWon = true;
-    }
-
+    if (levelIntroActive) {
+    drawLevelIntro();
     return;
 }
+
+if (comingSoonActive) {
+    drawComingSoonScreen();
+    return;
+}
+
+    if (winFade) {
+        if (
+    gameBackground.complete &&
+    gameBackground.naturalWidth > 0
+) {
+            ctx.drawImage(
+                gameBackground,
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+        } else {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        drawSnake();
+        drawFood();
+        drawCrown();
+        drawHeartEffects();
+        drawCuzon();
+        drawScore();
+        drawProjectiles();
+
+        winFadeAlpha += 0.08;
+
+        ctx.fillStyle =
+            "rgba(0, 0, 0, " + winFadeAlpha + ")";
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        if (winFadeAlpha >= 1) {
+            winFade = false;
+            levelComplete = true;
+        }
+
+        return;
+    }
+
+    if (levelComplete) {
+        drawLevelComplete();
+        return;
+    }
+
     if (gameWon) {
         drawWinScreen();
         return;
@@ -953,7 +1963,10 @@ function draw() {
     }
 
     if (gamePaused) {
-    if (gameBackground.complete) {
+    if (
+    gameBackground.complete &&
+    gameBackground.naturalWidth > 0
+) {
         ctx.drawImage(gameBackground, 0, 0, canvas.width, canvas.height);
     } else {
         ctx.fillStyle = "black";
@@ -965,6 +1978,7 @@ function draw() {
     drawCrown();
     drawCuzon();
     drawScore();
+    drawProjectiles();
 
     ctx.fillStyle = "rgba(0, 0, 0, 0.60)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -982,7 +1996,10 @@ function draw() {
     return;
 }
 
-    if (gameBackground.complete) {
+    if (
+    gameBackground.complete &&
+    gameBackground.naturalWidth > 0
+) {
         ctx.drawImage(gameBackground, 0, 0, canvas.width, canvas.height);
 
         ctx.fillStyle = "rgba(0, 0, 0, 0.20)";
@@ -993,9 +2010,13 @@ function draw() {
     }
 
     moveSnake();
-    moveCuzon();
+moveCuzon();
+moveProjectiles();
 
-    if (comboTimer > 0) {
+    if (slowTimer > 0) {
+    slowTimer--;
+    setGameSpeed(220);
+} else if (comboTimer > 0) {
     comboTimer--;
     setGameSpeed(110);
 } else {
@@ -1004,16 +2025,18 @@ function draw() {
 }
 
     checkWallCollision();
-    checkCuzonCollision();
-    checkFoodCollision();
-    checkCrownCollision();
+checkCuzonCollision();
+checkFoodCollision();
+checkCrownCollision();
+checkProjectileCollision();
 
     drawSnake();
     drawFood();
     drawCrown();
     drawHeartEffects();
     drawCuzon();
-    drawScore();
+drawProjectiles();
+drawScore();
 }
 
 let gameLoopSpeed = 150;
