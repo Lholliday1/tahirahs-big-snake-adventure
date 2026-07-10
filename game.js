@@ -21,6 +21,10 @@ bgMusic.volume = 0.35;
 
 const muteButton = document.getElementById("muteButton");
 const pauseButton = document.getElementById("pauseButton");
+const upButton = document.getElementById("upButton");
+const downButton = document.getElementById("downButton");
+const leftButton = document.getElementById("leftButton");
+const rightButton = document.getElementById("rightButton");
 const notificationBar = document.getElementById("notificationBar");
 const tipBar = document.getElementById("tipBar");
 
@@ -54,6 +58,35 @@ pauseButton.addEventListener("click", function() {
         pauseButton.textContent = "⏸️ Pause";
         showNotification("▶️ Game Resumed", 2000);
     }
+});
+
+function useDpad(directionX, directionY) {
+    if (gameOver || gameWon || gamePaused) {
+        return;
+    }
+
+    startGame();
+    changeDirection(directionX, directionY);
+}
+
+upButton.addEventListener("pointerdown", function(event) {
+    event.preventDefault();
+    useDpad(0, -1);
+});
+
+downButton.addEventListener("pointerdown", function(event) {
+    event.preventDefault();
+    useDpad(0, 1);
+});
+
+leftButton.addEventListener("pointerdown", function(event) {
+    event.preventDefault();
+    useDpad(-1, 0);
+});
+
+rightButton.addEventListener("pointerdown", function(event) {
+    event.preventDefault();
+    useDpad(1, 0);
 });
 
 const introBackground = new Image();

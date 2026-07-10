@@ -138,3 +138,43 @@ canvas {
 #bottomBar button {
     min-width: 140px;
 }
+
+/* ---------------- D-Pad ---------------- */
+
+#dpad {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    margin: 8px 0;
+}
+
+.dpadMiddle {
+    display: flex;
+    gap: 8px;
+}
+
+#dpad button {
+    width: 58px;
+    height: 58px;
+
+    border: 2px solid hotpink;
+    border-radius: 14px;
+
+    background: rgba(0, 0, 0, 0.65);
+    color: white;
+
+    font-size: 24px;
+    cursor: pointer;
+
+    box-shadow:
+        0 0 10px hotpink,
+        0 0 18px deeppink;
+
+    transition: transform 0.1s;
+}
+
+#dpad button:active {
+    transform: scale(0.92);
+}
