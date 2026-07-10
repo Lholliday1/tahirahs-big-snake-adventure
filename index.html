@@ -28,6 +28,85 @@
     <button id="startAdventureButton">
         Start Adventure
     </button>
+    <button id="soundtrackButton">
+    🎵 Soundtrack
+</button>
+
+</div>
+
+<div id="soundtrackMenu">
+
+    <h2>Adventure Soundtrack 🎵</h2>
+
+    <p class="soundtrackIntro">
+        Listen to music featured throughout Tahirah's adventure.
+    </p>
+
+    <div class="soundtrackList">
+
+        <div class="soundtrackCard">
+            <div class="soundtrackIcon">📍</div>
+
+            <div class="soundtrackDetails">
+                <h3>Meridian, Mississippi</h3>
+                <p>“Mississippi Boy”</p>
+                <span>Charles Wilson</span>
+            </div>
+
+            <button
+                class="soundtrackPlayButton"
+                data-track="assets/music/meridian-theme.mp3"
+                data-title="Mississippi Boy">
+                ▶️ Play
+            </button>
+        </div>
+
+        <div class="soundtrackCard">
+            <div class="soundtrackIcon">📍</div>
+
+            <div class="soundtrackDetails">
+                <h3>Howell, New Jersey</h3>
+                <p>“Get Jiggy”</p>
+                <span>B Jack$ and ZEDDY WILL</span>
+            </div>
+
+            <button
+                class="soundtrackPlayButton"
+                data-track="assets/music/howell-theme.mp3"
+                data-title="Get Jiggy">
+                ▶️ Play
+            </button>
+        </div>
+
+        <div class="soundtrackCard lockedTrack">
+            <div class="soundtrackIcon">🔒</div>
+
+            <div class="soundtrackDetails">
+                <h3>New Orleans, Louisiana</h3>
+                <p>Locked</p>
+                <span>Coming in a future version</span>
+            </div>
+
+            <button disabled>
+                🔒 Locked
+            </button>
+        </div>
+
+    </div>
+
+    <p id="nowPlayingText">
+    Select a track to begin.
+</p>
+
+<div class="soundtrackMenuButtons">
+    <button id="soundtrackStopButton">
+        ⏹️ Stop Music
+    </button>
+
+    <button id="soundtrackBackButton">
+        ⬅️ Back to Main Menu
+    </button>
+</div>
 
 </div>
 

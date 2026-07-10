@@ -100,7 +100,6 @@ canvas {
     font-weight: bold;
 
     width: 100%;
-    height: 52px;
     min-height: 52px;
 
     display: flex;
@@ -111,7 +110,8 @@ canvas {
     line-height: 22px;
     text-align: center;
 
-    overflow: hidden;
+    overflow: visible;
+    overflow-wrap: break-word;
 
     text-shadow:
         0 0 8px gold,
@@ -489,6 +489,144 @@ canvas {
     transform: scale(0.96);
 }
 
+    /* ---------------- Soundtrack Menu ---------------- */
+
+#soundtrackMenu {
+    display: none;
+
+    width: min(92vw, 600px);
+    padding: 24px;
+
+    text-align: center;
+    color: white;
+
+    border: 2px solid hotpink;
+    border-radius: 20px;
+
+    background: rgba(0, 0, 0, 0.78);
+
+    box-shadow:
+        0 0 20px hotpink,
+        0 0 40px deeppink;
+}
+
+#soundtrackMenu h2 {
+    font-size: clamp(28px, 6vw, 42px);
+    margin-bottom: 12px;
+}
+
+.soundtrackIntro {
+    margin-bottom: 22px;
+    opacity: 0.9;
+    font-size: 17px;
+}
+
+.soundtrackList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.soundtrackCard {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    padding: 16px;
+
+    border-radius: 16px;
+    border: 2px solid hotpink;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    text-align: left;
+}
+
+.soundtrackIcon {
+    font-size: 34px;
+}
+
+.soundtrackDetails {
+    flex: 1;
+}
+
+.soundtrackDetails h3 {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+.soundtrackDetails p {
+    color: hotpink;
+    font-weight: bold;
+}
+
+.soundtrackDetails span {
+    opacity: 0.75;
+    font-size: 14px;
+}
+
+.soundtrackPlayButton,
+#soundtrackBackButton,
+#soundtrackStopButton,
+#soundtrackButton {
+
+    padding: 12px 22px;
+
+    border: 2px solid hotpink;
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+}
+
+.soundtrackPlayButton:hover,
+#soundtrackBackButton:hover,
+#soundtrackStopButton:hover,
+#soundtrackButton:hover {
+    transform: scale(1.05);
+
+    box-shadow:
+        0 0 14px hotpink,
+        0 0 28px deeppink;
+}
+
+#soundtrackButton {
+    margin-top: 14px;
+}
+
+.lockedTrack {
+    opacity: 0.45;
+}
+
+#nowPlayingText {
+    margin-top: 20px;
+    min-height: 24px;
+
+    color: gold;
+    font-weight: bold;
+}
+
+.soundtrackCard.activeTrack {
+    border-color: gold;
+
+    background: rgba(255, 215, 0, 0.12);
+
+    box-shadow:
+        0 0 14px gold,
+        0 0 28px rgba(255, 215, 0, 0.55);
+}
+
+/* ---------------- Mobile Layout ---------------- */
+
 @media (max-width: 700px) {
     #gameContainer {
         justify-content: flex-start;
@@ -497,8 +635,73 @@ canvas {
 
     #notificationBar {
         font-size: 15px;
-        height: 48px;
         min-height: 48px;
         line-height: 19px;
     }
+
+    .buttonRow {
+        width: 100%;
+
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .buttonRow button {
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    #mainMenuButton {
+        grid-column: 1 / -1;
+        justify-self: center;
+
+        width: min(100%, 220px);
+    }
+
+    #soundtrackMenu {
+        width: 94vw;
+        padding: 18px;
+    }
+
+    .soundtrackCard {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .soundtrackDetails {
+        width: 100%;
+    }
+
+    .soundtrackPlayButton {
+        width: 100%;
+        max-width: 220px;
+    }
+
+        #soundtrackBackButton,
+    #soundtrackStopButton {
+        width: 100%;
+        max-width: 260px;
+    }
+
+    .soundtrackMenuButtons {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+.soundtrackMenuButtons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    margin-top: 24px;
+}
+
+#soundtrackBackButton,
+#soundtrackStopButton {
+    margin-top: 0;
 }

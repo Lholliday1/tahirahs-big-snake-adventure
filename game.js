@@ -39,6 +39,24 @@ const newOrleansButton = document.getElementById("newOrleansButton");
 const resetProgressButton =
     document.getElementById("resetProgressButton");
 
+    const soundtrackButton =
+    document.getElementById("soundtrackButton");
+
+const soundtrackMenu =
+    document.getElementById("soundtrackMenu");
+
+const soundtrackBackButton =
+    document.getElementById("soundtrackBackButton");
+
+    const soundtrackStopButton =
+    document.getElementById("soundtrackStopButton");
+
+const nowPlayingText =
+    document.getElementById("nowPlayingText");
+
+const soundtrackPlayButtons =
+    document.querySelectorAll(".soundtrackPlayButton");
+
 let muted = false;
 let menuOpen = true;
 
@@ -374,11 +392,15 @@ function returnToMainMenu() {
     canvas.style.display = "none";
     document.getElementById("bottomBar").style.display = "none";
     worldMap.style.display = "none";
+    soundtrackMenu.style.display = "none";
     mainMenu.style.display = "block";
 
     menuOpen = true;
 
     pauseButton.textContent = "⏸️ Pause";
+
+    clearTimeout(notificationBar.timeout);
+notificationBar.textContent = "";
 
     startMenuMusic();
 }
@@ -445,7 +467,7 @@ function updateWorldMap() {
     }
 }
 
-const topHudHeight = 80;
+const topHudHeight = 92;
 const bottomHudHeight = 0;
 
 let cuzonChaseMode = false;
@@ -946,6 +968,176 @@ canvas.addEventListener("touchend", function(event) {
     }
 }, { passive: false });
 
+function openLevel(levelNumber) {
+    const level = levels[levelNumber];
+
+    menuOpen = false;
+
+    const preloadImage = new Image();
+    preloadImage.src = level.background;
+
+    preloadImage.onload = function() {
+        worldMap.style.display = "none";
+
+        loadLevel(levelNumber);
+
+        canvas.style.display = "block";
+        document.getElementById("bottomBar").style.display = "flex";
+
+        startGame();
+    };
+
+    preloadImage.onerror = function() {
+        worldMap.style.display = "none";
+
+        loadLevel(levelNumber);
+
+        canvas.style.display = "block";
+        document.getElementById("bottomBar").style.display = "flex";
+
+        startGame();
+    };
+}
+
+soundtrackButton.addEventListener("click", function() {
+    menuOpen = true;
+
+    mainMenu.style.display = "none";
+    soundtrackMenu.style.display = "block";
+
+    stopMusic();
+
+    nowPlayingText.textContent =
+        "Select a track to begin.";
+});
+
+let activeSoundtrackButton = null;
+let activeSoundtrackTrack = "";
+
+soundtrackPlayButtons.forEach(function(button) {
+    button.addEventListener("click", function() {
+        const selectedTrack =
+            button.dataset.track;
+
+        const selectedTitle =
+            button.dataset.title;
+
+        // Pause the song if this is already the active track.
+        if (
+            activeSoundtrackTrack === selectedTrack &&
+            !bgMusic.paused
+        ) {
+            bgMusic.pause();
+
+            button.textContent = "▶️ Resume";
+
+            nowPlayingText.textContent =
+                "⏸️ Paused: " + selectedTitle;
+
+            return;
+        }
+
+        // Resume the same track without restarting it.
+        if (
+            activeSoundtrackTrack === selectedTrack &&
+            bgMusic.paused
+        ) {
+            bgMusic.play().catch(function(error) {
+                console.log(
+                    "Soundtrack could not resume:",
+                    error
+                );
+            });
+
+            button.textContent = "⏸️ Pause";
+
+            nowPlayingText.textContent =
+                "🎵 Now Playing: " + selectedTitle;
+
+            return;
+        }
+
+        // A different song was selected.
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+
+        bgMusic.src = selectedTrack;
+        bgMusic.loop = true;
+        bgMusic.volume = 0.35;
+        bgMusic.load();
+
+        bgMusic.play().catch(function(error) {
+            console.log(
+                "Soundtrack could not play:",
+                error
+            );
+        });
+
+        soundtrackPlayButtons.forEach(function(otherButton) {
+    otherButton.textContent = "▶️ Play";
+
+    otherButton
+        .closest(".soundtrackCard")
+        .classList.remove("activeTrack");
+});
+
+activeSoundtrackButton = button;
+activeSoundtrackTrack = selectedTrack;
+
+button
+    .closest(".soundtrackCard")
+    .classList.add("activeTrack");
+
+        button.textContent = "⏸️ Pause";
+
+        nowPlayingText.textContent =
+            "🎵 Now Playing: " + selectedTitle;
+    });
+});
+
+soundtrackStopButton.addEventListener("click", function() {
+    stopMusic();
+
+    soundtrackPlayButtons.forEach(function(button) {
+        button.textContent = "▶️ Play";
+
+        button
+            .closest(".soundtrackCard")
+            .classList.remove("activeTrack");
+    });
+
+    activeSoundtrackButton = null;
+    activeSoundtrackTrack = "";
+
+    nowPlayingText.textContent =
+        "⏹️ Music stopped.";
+});
+
+soundtrackBackButton.addEventListener("click", function() {
+    stopMusic();
+
+    soundtrackMenu.style.display = "none";
+    mainMenu.style.display = "block";
+
+    menuOpen = true;
+
+    soundtrackPlayButtons.forEach(function(button) {
+    button.textContent = "▶️ Play";
+
+    button
+        .closest(".soundtrackCard")
+        .classList.remove("activeTrack");
+});
+
+    nowPlayingText.textContent =
+    "Select a track to begin.";
+
+activeSoundtrackButton = null;
+activeSoundtrackTrack = "";
+
+startMenuMusic();
+});
+
 startAdventureButton.addEventListener("click", function() {
     mainMenu.style.display = "none";
     worldMap.style.display = "block";
@@ -954,14 +1146,7 @@ startAdventureButton.addEventListener("click", function() {
 });
 
 meridianButton.addEventListener("click", function() {
-    menuOpen = false;
-
-    worldMap.style.display = "none";
-    canvas.style.display = "block";
-    document.getElementById("bottomBar").style.display = "flex";
-
-    loadLevel(1);
-    startGame();
+    openLevel(1);
 });
 
 howellButton.addEventListener("click", function() {
@@ -973,14 +1158,7 @@ howellButton.addEventListener("click", function() {
         return;
     }
 
-    menuOpen = false;
-
-    worldMap.style.display = "none";
-    canvas.style.display = "block";
-    document.getElementById("bottomBar").style.display = "flex";
-
-    loadLevel(2);
-    startGame();
+    openLevel(2);
 });
 
 newOrleansButton.addEventListener("click", function() {
@@ -992,14 +1170,7 @@ newOrleansButton.addEventListener("click", function() {
         return;
     }
 
-    menuOpen = false;
-
-    worldMap.style.display = "none";
-    canvas.style.display = "block";
-    document.getElementById("bottomBar").style.display = "flex";
-
-    loadLevel(3);
-    startGame();
+    openLevel(3);
 });
 
 mainMenuButton.addEventListener("click", function() {
@@ -1267,9 +1438,9 @@ function drawScore() {
     ctx.shadowColor = "black";
     ctx.shadowBlur = 6;
 
-    ctx.fillText("Hearts: " + score, 24, 10);
-    ctx.fillText("Best: " + highScore, 24, 36);
-    ctx.fillText("Combo: x" + combo, 24, 62);
+    ctx.fillText("Hearts: " + score, 24, 8);
+    ctx.fillText("Best: " + highScore, 24, 34);
+    ctx.fillText("Combo: x" + combo, 24, 60);
     ctx.textAlign = "right";
 ctx.fillStyle = "hotpink";
 ctx.font = "bold 18px Arial";
@@ -1964,13 +2135,24 @@ if (comingSoonActive) {
 
     if (gamePaused) {
     if (
-    gameBackground.complete &&
-    gameBackground.naturalWidth > 0
-) {
-        ctx.drawImage(gameBackground, 0, 0, canvas.width, canvas.height);
+        gameBackground.complete &&
+        gameBackground.naturalWidth > 0
+    ) {
+        ctx.drawImage(
+            gameBackground,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
     } else {
         ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
     }
 
     drawSnake();
@@ -1980,19 +2162,45 @@ if (comingSoonActive) {
     drawScore();
     drawProjectiles();
 
-    ctx.fillStyle = "rgba(0, 0, 0, 0.60)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Dark overlay over the playable area only.
+    ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
+    ctx.fillRect(
+        0,
+        topHudHeight,
+        canvas.width,
+        canvas.height - topHudHeight
+    );
+
+    // Find the center of the playable area below the HUD.
+    const pauseCenterY =
+        topHudHeight +
+        (canvas.height - topHudHeight) / 2;
+
+    ctx.save();
 
     ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
     ctx.fillStyle = "white";
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 10;
+
     ctx.font = "bold 46px Arial";
-    ctx.fillText("⏸️ PAUSED", canvas.width / 2, canvas.height / 2);
+    ctx.fillText(
+        "⏸️ PAUSED",
+        canvas.width / 2,
+        pauseCenterY - 25
+    );
 
     ctx.font = "22px Arial";
-    ctx.fillText("Press P or Tap Resume", canvas.width / 2, canvas.height / 2 + 50);
+    ctx.fillText(
+        "Press P or Tap Resume",
+        canvas.width / 2,
+        pauseCenterY + 35
+    );
 
-    ctx.textAlign = "start";
+    ctx.restore();
+
     return;
 }
 
